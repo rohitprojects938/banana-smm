@@ -199,43 +199,47 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 // --- Passport Configuration ---
-passport.use(
-  new GoogleStrategy(
-    {
-      clientID: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: `${BASE_URL}/auth/google/callback`,
-    },
-    async (accessToken, refreshToken, profile, done) => {
-      try {
-        const googleId = profile.id;
-        const email = profile.emails && profile.emails[0] ? profile.emails[0].value : null;
-        const name = profile.displayName || "Google User";
+if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+  passport.use(
+    new GoogleStrategy(
+      {
+        clientID: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        callbackURL: `${BASE_URL}/auth/google/callback`,
+      },
+      async (accessToken, refreshToken, profile, done) => {
+        try {
+          const googleId = profile.id;
+          const email = profile.emails && profile.emails[0] ? profile.emails[0].value : null;
+          const name = profile.displayName || "Google User";
 
-        // Check if user exists
-        const [rows] = await pool.query("SELECT * FROM users WHERE google_id = ?", [googleId]);
-        
-        if (rows.length > 0) {
-          return done(null, rows[0]);
+          // Check if user exists
+          const [rows] = await pool.query("SELECT * FROM users WHERE google_id = ?", [googleId]);
+          
+          if (rows.length > 0) {
+            return done(null, rows[0]);
+          }
+
+          // Create new user
+          const apiKey = Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2);
+          
+          const [result] = await pool.query(
+            "INSERT INTO users (google_id, email, username, balance, currency, is_admin, is_developer, api_key) VALUES (?, ?, ?, 0.00, 'INR', 0, 0, ?)",
+            [googleId, email, name, apiKey]
+          );
+
+          const [newUserRows] = await pool.query("SELECT * FROM users WHERE id = ?", [result.insertId]);
+          return done(null, newUserRows[0]);
+
+        } catch (err) {
+          return done(err);
         }
-
-        // Create new user
-        const apiKey = Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2);
-        
-        const [result] = await pool.query(
-          "INSERT INTO users (google_id, email, username, balance, currency, is_admin, is_developer, api_key) VALUES (?, ?, ?, 0.00, 'INR', 0, 0, ?)",
-          [googleId, email, name, apiKey]
-        );
-
-        const [newUserRows] = await pool.query("SELECT * FROM users WHERE id = ?", [result.insertId]);
-        return done(null, newUserRows[0]);
-
-      } catch (err) {
-        return done(err);
       }
-    }
-  )
-);
+    )
+  );
+} else {
+  console.log("Google OAuth disabled - env vars missing");
+}
 
 passport.serializeUser((user, done) => {
   done(null, user.id);
