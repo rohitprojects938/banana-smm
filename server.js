@@ -14,11 +14,13 @@ const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const multer = require("multer");
 const fs = require("fs");
 
+let APP_READY = false;
+
 const app = express();
 
 // --- Configuration ---
-const PORT = 3000;
 const SESSION_SECRET = process.env.SESSION_SECRET || 'secure-smm-saas-key-2026';
+const BASE_URL = process.env.BASE_URL || "http://localhost:3000";
 
 // --- MySQL Connection Pool ---
 const pool = mysql.createPool({
@@ -37,7 +39,11 @@ const pool = mysql.createPool({
     const connection = await pool.getConnection();
     console.log("MySQL connected successfully");
     connection.release();
-    initDB(); // Initialize tables after connection
+    setTimeout(async () => {
+      await initDB();
+      APP_READY = true;
+      console.log("APP READY = true");
+    }, 5000);
   } catch (error) {
     console.error("MySQL connection error:", error.message);
   }
@@ -198,7 +204,7 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: `${process.env.BASE_URL}/auth/google/callback`,
+      callbackURL: `${BASE_URL}/auth/google/callback`,
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
@@ -290,6 +296,11 @@ const requireAdmin = (req, res, next) => {
 
 // --- CRON JOB ---
 cron.schedule('*/2 * * * *', async () => {
+  if (!APP_READY) {
+    console.log("CRON skipped - app not ready");
+    return;
+  }
+
   console.log("Cron: Auto processing pending manual orders");
 
   try {
@@ -339,6 +350,11 @@ cron.schedule('*/2 * * * *', async () => {
 });
 
 cron.schedule('0 3 * * *', async () => {
+  if (!APP_READY) {
+    console.log("CRON skipped - app not ready");
+    return;
+  }
+
   console.log("CRON: Checking negative margin services");
 
   try {
@@ -1253,8 +1269,10 @@ app.get("/change-admin-pass", async (req, res) => {
 
   res.send("Admin password changed");
 });
-
-
-
 // --- Start Server ---
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, "0.0.0.0", () => {
+  console.log("Server running on port " + PORT);
+});
+
