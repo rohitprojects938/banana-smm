@@ -1,0 +1,493 @@
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-0 pb-12">
+  
+  <div class="mb-8">
+    <h1 class="text-3xl font-extrabold text-slate-900">New Order</h1>
+    <p class="text-slate-500 mt-1">Select a service, paste your link, and place your order securely.</p>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    
+    <div class="lg:col-span-2 bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+        <div class="relative">
+          <label class="block text-sm font-semibold text-slate-700 mb-2">Category</label>
+          <div
+            id="categoryDropdownBtn"
+            class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 cursor-pointer text-slate-800 flex justify-between items-center transition-all focus:ring-2 focus:ring-blue-500"
+          >
+            <span id="selectedCategoryLabel" class="truncate">Select Category</span>
+            <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          </div>
+
+          <div
+            id="categoryDropdown"
+            class="hidden absolute z-50 mt-2 w-full max-h-72 overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-xl"
+          >
+            </div>
+        </div>
+
+        <div class="relative">
+          <label class="block text-sm font-semibold text-slate-700 mb-2">Service</label>
+          <div
+            id="serviceDropdownBtn"
+            class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 cursor-pointer text-slate-800 flex justify-between items-center transition-all focus:ring-2 focus:ring-blue-500"
+          >
+            <span id="selectedServiceLabel" class="truncate">Select Service</span>
+            <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          </div>
+
+          <div
+            id="serviceDropdown"
+            class="hidden absolute z-50 mt-2 w-full max-h-72 overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-xl"
+          >
+            </div>
+        </div>
+
+
+        <div class="md:col-span-2">
+          <label class="block text-sm font-semibold text-slate-700 mb-2">Link</label>
+         <input
+  id="orderLink"
+  type="url"
+  inputmode="url"
+  autocomplete="off"
+  placeholder="Paste your Instagram / YouTube link here..."
+
+            class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <p class="text-xs text-slate-500 mt-2">Example: https://instagram.com/yourprofile</p>
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-2">Quantity</label>
+          <input
+  id="orderQty"
+  type="number"
+  inputmode="numeric"
+  pattern="[0-9]*"
+  value="0"
+  min="0"
+
+            class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <p id="minMaxText" class="text-xs text-slate-500 mt-2"></p>
+        </div>
+      </div>
+
+      <div class="mt-6 flex flex-col sm:flex-row gap-3">
+        <button id="placeOrderBtn"
+          class="w-full sm:w-auto flex-1 bg-slate-900 hover:bg-slate-800 text-white font-semibold py-3 rounded-xl shadow-lg shadow-slate-900/20 transition-all">
+          Place Order
+        </button>
+
+        <button id="resetBtn"
+          class="w-full sm:w-auto px-6 py-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold transition-all">
+          Reset
+        </button>
+      </div>
+
+      <div id="orderError" class="hidden mt-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm"></div>
+      <div id="orderSuccess" class="hidden mt-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm"></div>
+    </div>
+
+    <div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
+      <h3 class="text-lg font-bold text-slate-900 mb-4">Order Summary</h3>
+
+      <div class="space-y-3 text-sm">
+        <div class="flex justify-between text-slate-600">
+          <span>Category</span>
+         <span id="summaryCategory" class="font-semibold text-slate-800 ml-2">-</span>
+
+        </div>
+
+        <div class="flex justify-between text-slate-600">
+          <span>Service</span>
+         <span id="summaryService" class="font-semibold text-slate-800 ml-2">-</span>
+
+        </div>
+
+        <div class="flex justify-between text-slate-600">
+          <span>Rate</span>
+          <span id="summaryRate" class="font-semibold text-slate-800">₹0 / 1000</span>
+        </div>
+
+        <div class="flex justify-between text-slate-600">
+          <span>Quantity</span>
+          <span id="summaryQty" class="font-semibold text-slate-800">0</span>
+        </div>
+      </div>
+
+      <div class="mt-5 p-4 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-between">
+        <div>
+          <p class="text-xs font-semibold text-blue-600 uppercase tracking-wide">Total Charge</p>
+          <p class="text-slate-500 text-xs mt-1">Calculated in INR</p>
+        </div>
+        <div class="text-3xl font-black text-blue-600" id="totalChargeText">₹0.00</div>
+      </div>
+
+      <div class="mt-5 text-xs text-slate-500 leading-relaxed">
+        <p class="font-semibold text-slate-700 mb-1">Important</p>
+        <ul class="list-disc pl-4 space-y-1">
+          <li>Make sure your link is correct</li>
+          <li>Orders start automatically after payment</li>
+          <li>Use non-drop services for better results</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<style>
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.25s ease-out;
+}
+</style>
+
+<div id="orderSuccessModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+  <div class="bg-white rounded-2xl shadow-xl w-[90%] max-w-md p-6 text-center animate-scale-in">
+    <div class="text-green-600 text-4xl mb-3">
+      ✔
+    </div>
+    <h2 class="text-lg font-bold text-slate-800 mb-2">
+      Order Placed Successfully
+    </h2>
+    <p class="text-sm text-slate-500 mb-6">
+      Your order has been received and will be processed shortly.
+    </p>
+    <button
+      id="closeOrderModalBtn"
+      class="w-full py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition">
+      OK
+    </button>
+  </div>
+</div>
+
+<script id="db-services" type="application/json"><%- JSON.stringify(services || []).replace(/<\/script>/g, '<\\/script>') %></script>
+
+<script>
+  
+  const DB_SERVICES = JSON.parse(document.getElementById('db-services').textContent || '[]');
+
+  const HIDDEN_CATEGORIES = [
+    "⫷ ╼╼╼╼╼╼ ✇ ╼╼╼╼╼╼ ⫸",
+    "💻 Smm Panel Development",
+    "📌 Website Development",
+    "Canva Pro 🎨 ➜ (Graphic Design Premium tool)",
+    "Digital Products / Course",
+    "Facebook | 🇧🇩 Bangladesh Service",
+    "Graphics & Creative Design",
+    "Paid Ads & Campaign Management",
+    "Rady - Made Viral Reels Bundle ➜ Instagram Organic Growth",
+    "TikTok Comments",
+    "TikTok Followers",
+    "TikTok Followers ➜ Targeted",
+    "TikTok Likes",
+    "TikTok Views"
+  ];
+
+  // ✅ DEFAULT SERVICES (Exact SafeSMM-like)
+const DEFAULT_SERVICE_IDS = [
+  3533, // Instagram Reels Views
+  4017, // Instagram Likes
+  4515, // Instagram Followers Old
+  3973, // Instagram Followers Cheapest
+  4656, // Instagram Random Comments
+  4657, // Instagram Custom Comments
+  4552, // Facebook Followers Non Drop
+  3688, // YouTube Views
+  4596  // YouTube Subscribers
+];
+
+
+  // Category Dropdown Elements
+  const categoryDropdownBtn = document.getElementById("categoryDropdownBtn");
+  const categoryDropdown = document.getElementById("categoryDropdown");
+  const selectedCategoryLabel = document.getElementById("selectedCategoryLabel");
+
+  // Service Dropdown Elements
+  const serviceDropdownBtn = document.getElementById("serviceDropdownBtn");
+  const serviceDropdown = document.getElementById("serviceDropdown");
+  const selectedServiceLabel = document.getElementById("selectedServiceLabel");
+
+  const orderQty = document.getElementById("orderQty");
+
+  const summaryCategory = document.getElementById("summaryCategory");
+  const summaryService = document.getElementById("summaryService");
+  const summaryRate = document.getElementById("summaryRate");
+  const summaryQty = document.getElementById("summaryQty");
+
+  const minMaxText = document.getElementById("minMaxText");
+  const totalChargeText = document.getElementById("totalChargeText");
+
+  let currentSelectedCategory = "";
+  let currentSelectedService = null;
+
+  function formatINR(num) {
+    return "₹" + Number(num || 0).toFixed(2);
+  }
+
+  // --- Category Logic ---
+  
+  function initCategories() {
+    const categories = [...new Set(DB_SERVICES.map(s => s.category))];
+    
+    // Filter out hidden categories
+    const visibleCategories = categories.filter(cat => !HIDDEN_CATEGORIES.includes(cat));
+    
+    categoryDropdown.innerHTML = '';
+    
+    visibleCategories.forEach(cat => {
+      const item = document.createElement("div");
+      item.className = "p-4 hover:bg-slate-50 cursor-pointer border-b border-slate-100 last:border-b-0 transition-colors text-sm font-medium text-slate-800 break-words leading-snug";
+      item.innerText = cat;
+      item.addEventListener('click', () => selectCategory(cat));
+      categoryDropdown.appendChild(item);
+    });
+  }
+
+  function selectCategory(category) {
+    currentSelectedCategory = category;
+    selectedCategoryLabel.innerText = category;
+    categoryDropdown.classList.add('hidden');
+    
+  summaryCategory.innerText = " " + category.toUpperCase();
+
+    
+    // Reset and Load services
+    populateServices(category);
+  }
+
+  // --- Service Logic ---
+
+  function resetServiceDropdown() {
+    serviceDropdown.innerHTML = '';
+    selectedServiceLabel.innerText = 'Select Service';
+    currentSelectedService = null;
+    minMaxText.innerText = "";
+    summaryService.innerText = "-";
+    summaryRate.innerText = "₹0 / 1000";
+    updateTotal();
+  }
+
+function populateServices(category = "") {
+  resetServiceDropdown();
+
+  let filtered = [];
+
+  if (category) {
+    // Category selected → only that category services
+    filtered = DB_SERVICES.filter(s => s.category === category);
+  } else {
+    // ❗ NO CATEGORY → show default services
+  filtered = DB_SERVICES.filter(s =>
+  DEFAULT_SERVICE_IDS.includes(Number(s.provider_service_id))
+    );
+  }
+
+  filtered.forEach(s => {
+    const item = document.createElement("div");
+    item.className =
+      "p-4 hover:bg-slate-50 cursor-pointer border-b border-slate-100 last:border-b-0 transition-colors";
+
+    item.innerHTML = `
+      <div class="text-sm font-medium text-slate-800 break-words leading-snug">
+        ${s.name}
+      </div>
+      <div class="mt-1 flex items-center justify-between text-[11px] text-slate-500 font-semibold uppercase tracking-wider">
+        <span>₹${s.selling_rate} per 1000</span>
+      </div>
+    `;
+
+    item.addEventListener("click", () => selectService(s));
+    serviceDropdown.appendChild(item);
+  });
+}
+
+function selectService(service) {
+  currentSelectedService = service;
+
+  // ✅ AUTO CATEGORY SET (IMPORTANT FIX)
+  if (!currentSelectedCategory && service.category) {
+    currentSelectedCategory = service.category;
+    selectedCategoryLabel.innerText = service.category;
+    summaryCategory.innerText = service.category.toUpperCase();
+  }
+
+  selectedServiceLabel.innerText = service.name;
+  serviceDropdown.classList.add('hidden');
+
+  summaryService.innerText = service.name;
+  summaryRate.innerText = `₹${service.selling_rate} / 1000`;
+
+
+  // ✅ MIN MAX SHOW
+  if (service.min && service.max) {
+    minMaxText.innerText = "Minimum: " + service.min + " | Maximum: " + service.max;
+    minMaxText.className = "text-xs text-gray-400 mt-2";
+
+    orderQty.min = service.min;
+    orderQty.max = service.max;
+    
+    // ✅ Default quantity = 1000 (or service.min if min > 1000)
+const defaultQty = 1000;
+
+if (service.min && service.min > defaultQty) {
+  orderQty.value = service.min;
+} else {
+  orderQty.value = defaultQty;
+}
+
+  } else {
+    minMaxText.innerText = "";
+  }
+
+  updateTotal();
+}
+
+
+  function updateTotal() {
+    const rate = Number(currentSelectedService?.selling_rate || 0);
+    const qty = Number(orderQty.value || 0);
+
+    summaryQty.innerText = qty;
+    const total = (rate / 1000) * qty;
+    totalChargeText.innerText = formatINR(total);
+  }
+
+  // --- Event Listeners ---
+
+  categoryDropdownBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    categoryDropdown.classList.toggle('hidden');
+    serviceDropdown.classList.add('hidden'); // Close other
+  });
+
+  serviceDropdownBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    serviceDropdown.classList.toggle('hidden');
+    categoryDropdown.classList.add('hidden'); // Close other
+  });
+
+  document.addEventListener('click', () => {
+    categoryDropdown.classList.add('hidden');
+    serviceDropdown.classList.add('hidden');
+  });
+
+  orderQty.addEventListener("input", () => {
+    updateTotal();
+  });
+  
+document.getElementById("resetBtn").addEventListener("click", () => {
+  currentSelectedCategory = "";
+  selectedCategoryLabel.innerText = "Select Category";
+  resetServiceDropdown();
+  summaryCategory.innerText = "-";
+
+  orderQty.value = 0;
+  orderQty.min = 0;
+  orderQty.max = "";
+  minMaxText.innerText = "";
+
+  document.getElementById("orderLink").value = "";
+  totalChargeText.innerText = "₹0.00";
+});
+
+
+  document.getElementById("placeOrderBtn").addEventListener("click", () => {
+    const err = document.getElementById("orderError");
+    const ok = document.getElementById("orderSuccess");
+
+    err.classList.add("hidden");
+    ok.classList.add("hidden");
+
+    const category = currentSelectedCategory;
+    const serviceId = currentSelectedService ? currentSelectedService.id : null;
+    const link = document.getElementById("orderLink").value.trim();
+    const qty = Number(orderQty.value || 0);
+
+        // ❗ Category only required if service NOT selected
+    if (!serviceId && !category) {
+      err.innerText = "Please select a category.";
+      err.classList.remove("hidden");
+      return;
+    }
+
+
+    if (!serviceId) {
+      err.innerText = "Please select a service.";
+      err.classList.remove("hidden");
+      return;
+    }
+
+    if (!link) {
+      err.innerText = "Please paste your link.";
+      err.classList.remove("hidden");
+      return;
+    }
+
+    if (!qty || qty <= 0) {
+      err.innerText = "Quantity must be greater than 0.";
+      err.classList.remove("hidden");
+      return;
+    }
+    if (currentSelectedService?.min && qty < currentSelectedService.min) {
+      err.innerText = `Minimum quantity is ${currentSelectedService.min}`;
+      err.classList.remove("hidden");
+      return;
+    }
+
+    if (currentSelectedService?.max && qty > currentSelectedService.max) {
+      err.innerText = `Maximum quantity is ${currentSelectedService.max}`;
+      err.classList.remove("hidden");
+      return;
+    }
+
+    fetch("/api/place-order", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        service_id: serviceId,
+        link: link,
+        quantity: qty
+      })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        ok.classList.add("hidden");
+        const modal = document.getElementById("orderSuccessModal");
+        const closeBtn = document.getElementById("closeOrderModalBtn");
+
+        modal.classList.remove("hidden");
+
+        closeBtn.onclick = () => {
+          modal.classList.add("hidden");
+          window.location.href = "/orders";
+        };
+      } else {
+        err.innerText = data.error || "Order failed.";
+        err.classList.remove("hidden");
+      }
+    })
+    .catch(() => {
+      err.innerText = "Server error. Please try again.";
+      err.classList.remove("hidden");
+    });
+  });
+
+  // Initialize
+  initCategories();
+  populateServices(); // 👈 DEFAULT SERVICES LOAD
+</script>

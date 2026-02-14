@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Landing Editor</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100">
+  <div class="max-w-3xl mx-auto p-6">
+    <h1 class="text-2xl font-bold mb-4">Landing Page Editor</h1>
+
+    <div class="bg-white p-6 rounded-xl shadow">
+      <label class="block text-sm font-semibold mb-1">Brand Name</label>
+      <input id="brand_name" class="w-full border p-3 rounded mb-4" value="<%= data.brand_name %>"/>
+
+      <label class="block text-sm font-semibold mb-1">Hero Headline</label>
+      <textarea id="hero_headline" class="w-full border p-3 rounded mb-4" rows="2"><%= data.hero_headline %></textarea>
+
+      <label class="block text-sm font-semibold mb-1">Hero Subheadline</label>
+      <textarea id="hero_subheadline" class="w-full border p-3 rounded mb-4" rows="2"><%= data.hero_subheadline %></textarea>
+
+      <button onclick="saveData()" class="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold">
+        Save Changes
+      </button>
+    </div>
+  </div>
+
+  <script>
+    async function saveData() {
+      const payload = {
+        brand_name: document.getElementById("brand_name").value,
+        hero_headline: document.getElementById("hero_headline").value,
+        hero_subheadline: document.getElementById("hero_subheadline").value
+      };
+
+      const res = await fetch("/admin/save-landing", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      if(res.ok) alert("Saved!");
+      else alert("Error saving!");
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,292 @@
+<div class="animate-fade-in-up max-w-6xl mx-auto px-4 pb-12">
+
+    <div class="mb-8">
+        <h1 class="text-2xl font-bold text-slate-900">Add Funds</h1>
+        <p class="text-slate-500 text-sm">Securely deposit funds into your wallet to boost your growth.</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 items-start">
+        <div class="lg:col-span-2 relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-blue-900 rounded-3xl p-8 text-white shadow-xl shadow-blue-900/20">
+            <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                <div>
+                    <div class="flex items-center gap-2 mb-2 opacity-80">
+                        <i class="fa-solid fa-shield-halved text-blue-400"></i>
+                        <span class="text-xs font-semibold uppercase tracking-wider">Secure Wallet System</span>
+                    </div>
+                    <div class="flex items-baseline gap-2">
+                        <span class="text-4xl font-bold">
+                            ₹<%= Number((typeof user !== 'undefined' ? user.balance : 0) || 0).toFixed(2) %>
+                        </span>
+                        <span class="text-blue-300 text-sm">Current Balance</span>
+                    </div>
+                </div>
+                
+                <div class="flex flex-wrap gap-4">
+                    <div class="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl px-4 py-3">
+                        <p class="text-[10px] uppercase text-blue-200 mb-1">Lifetime Deposits</p>
+                        <p class="font-bold">
+                            ₹<%= Number((typeof totalSpend !== 'undefined' ? totalSpend : 0) || 0).toFixed(2) %>
+                        </p>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl px-4 py-3">
+                        <p class="text-[10px] uppercase text-blue-200 mb-1">Status</p>
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                            <span class="font-bold text-sm">Wallet Active</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="absolute -right-10 -bottom-10 opacity-10">
+                <i class="fa-solid fa-wallet text-[200px] rotate-12"></i>
+            </div>
+        </div>
+    
+        <div class="hidden lg:block lg:col-span-1 bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                </div>
+                <div>
+                    <h4 class="font-bold text-slate-800 text-sm">Last Deposit</h4>
+                    <p class="text-xs text-slate-500">Manual Verification</p>
+                </div>
+            </div>
+            <div class="pt-4 border-t border-slate-100">
+                <div class="flex items-center gap-2 text-xs text-amber-600 font-medium">
+                    <i class="fa-solid fa-circle-info"></i>
+                    Manual Verification System Active
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+        <div class="lg:col-span-2 space-y-8">
+            <div class="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm">
+                <div class="mb-6">
+                    <label class="block text-sm font-bold text-slate-700 mb-4">1. Enter Deposit Amount</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                            <span class="text-slate-400 font-bold text-xl">₹</span>
+                        </div>
+                        <input type="number" id="amount" name="amount" 
+                            class="block w-full pl-12 pr-4 py-5 bg-slate-50 border-2 border-slate-100 rounded-2xl text-2xl font-bold text-slate-900 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all" 
+                            placeholder="Enter amount (Min &#8377;10)" min="10" required>
+                    </div>
+                    <div class="flex justify-between mt-3">
+                        <p class="text-xs text-slate-500">Minimum: <span class="font-semibold text-slate-700">&#8377;10</span></p>
+                        <p id="validationMsg" class="text-xs font-medium"></p>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap gap-3 mb-8">
+                    <button type="button" data-amount="500" class="amount-btn px-5 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:border-blue-500 hover:text-blue-600 hover:bg-blue-50 transition-all">
+                        ₹500
+                    </button>
+                    <button type="button" data-amount="1000" class="amount-btn px-5 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:border-blue-500 hover:text-blue-600 hover:bg-blue-50 transition-all">
+                        ₹1,000
+                    </button>
+                    <button type="button" data-amount="2000" class="amount-btn px-5 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:border-blue-500 hover:text-blue-600 hover:bg-blue-50 transition-all">
+                        ₹2,000
+                    </button>
+                    <button type="button" data-amount="5000" class="amount-btn px-5 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:border-blue-500 hover:text-blue-600 hover:bg-blue-50 transition-all">
+                        ₹5,000
+                    </button>
+                    <button type="button" data-amount="10000" class="amount-btn px-5 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:border-blue-500 hover:text-blue-600 hover:bg-blue-50 transition-all">
+                        ₹10,000
+                    </button>
+                </div>
+
+                <div class="bg-slate-50 rounded-2xl p-6 border border-slate-200 mb-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <div class="flex items-center gap-2">
+                            <span class="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center">
+                                <i class="fa-solid fa-bolt-lightning text-xs"></i>
+                            </span>
+                            <div>
+                                <h3 class="font-bold text-slate-800">Pay via UPI</h3>
+                                <p class="text-[10px] text-slate-500 uppercase tracking-tighter">Scan QR and submit transaction ID</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-col items-center text-center mb-6">
+                        <img src="/images/upi-qr.png.png" class="w-[220px] rounded-xl shadow-md mb-4 bg-white p-2 border border-slate-100" alt="UPI QR">
+                        <p class="text-sm font-bold text-slate-700">Scan this QR using any UPI app and complete the payment</p>
+                        <p class="text-xs text-slate-500 mt-1">Pay the same amount you entered above</p>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label for="txn_id" class="block text-sm font-bold text-slate-700 ml-2">Enter Transaction ID</label>
+                        <input type="text" id="txn_id" required
+                            class="block w-full px-4 py-4 bg-white border-2 border-slate-100 rounded-2xl text-lg font-semibold text-slate-900 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all" 
+                            placeholder="423874923874">
+                    </div>
+                </div>
+
+                <button id="payButton" disabled 
+                    class="w-full py-5 bg-slate-400 text-white rounded-2xl font-bold text-lg shadow-lg transition-all flex items-center justify-center gap-3 cursor-not-allowed group">
+                    <i class="fa-solid fa-lock text-sm opacity-50"></i>
+                    Submit Payment Request
+                </button>
+            </div>
+        </div>
+
+        <div class="space-y-6">
+            <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm lg:sticky lg:top-8">
+                <h3 class="font-bold text-slate-800 mb-6">Deposit Summary</h3>
+                <div class="space-y-4">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-slate-500">Amount</span>
+                        <span id="summaryAmount" class="font-bold text-slate-800">₹0.00</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-slate-500">Gateway Fees</span>
+                        <span class="text-green-600 font-bold">₹0.00 (Free)</span>
+                    </div>
+                    <hr class="border-slate-100">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm font-bold text-slate-800">Total Credit</span>
+                        <span id="summaryTotal" class="text-xl font-black text-blue-600">₹0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="block lg:hidden bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-slate-800 text-sm">Last Deposit</h4>
+                        <p class="text-xs text-slate-500">Manual Verification</p>
+                    </div>
+                </div>
+                <div class="pt-4 border-t border-slate-100">
+                    <div class="flex items-center gap-2 text-xs text-amber-600 font-medium">
+                        <i class="fa-solid fa-circle-info"></i>
+                        Manual Verification System Active
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="paymentModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 min-h-screen p-4">
+    <div class="bg-white rounded-2xl p-6 max-w-sm w-full text-center shadow-xl animate-fade-in">
+        <div class="mb-4">
+            <i class="fa-solid fa-circle-check text-green-500 text-4xl"></i>
+        </div>
+        <h3 class="text-lg font-bold text-slate-800 mb-2">
+            Payment Received
+        </h3>
+        <p class="text-sm text-slate-600 mb-6">
+            Your funds will be added after verification. Please wait.
+        </p>
+        <button id="closeModal"
+            class="px-6 py-2 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition">
+            OK
+        </button>
+    </div>
+</div>
+
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const amountInput = document.getElementById("amount");
+    const txnIdInput = document.getElementById("txn_id");
+    const payBtn = document.getElementById("payButton");
+    const validationMsg = document.getElementById("validationMsg");
+    const summaryAmount = document.getElementById("summaryAmount");
+    const summaryTotal = document.getElementById("summaryTotal");
+
+
+    function validateInput() {
+        const val = parseFloat(amountInput.value) || 0;
+        const txnId = txnIdInput.value.trim();
+
+        summaryAmount.innerText = `₹${val.toFixed(2)}`;
+        summaryTotal.innerText = `₹${val.toFixed(2)}`;
+
+        if (val >= 10 && txnId !== "") {
+            payBtn.disabled = false;
+            payBtn.classList.remove("bg-slate-400", "cursor-not-allowed");
+            payBtn.classList.add("bg-blue-600", "hover:bg-blue-700");
+            validationMsg.innerText = "Details ready for submission";
+            validationMsg.className = "text-xs font-medium text-green-600";
+        } else {
+            payBtn.disabled = true;
+            payBtn.className = "w-full py-5 bg-slate-400 text-white rounded-2xl font-bold text-lg shadow-lg transition-all flex items-center justify-center gap-3 cursor-not-allowed group";
+            if(val < 10 && val !== 0) {
+                validationMsg.innerText = "Min amount is \u20B910";
+                validationMsg.className = "text-xs font-medium text-red-500";
+            } else {
+                validationMsg.innerText = "";
+            }
+        }
+    }
+
+    // Amount preset buttons
+    document.querySelectorAll(".amount-btn").forEach(btn => {
+        btn.addEventListener("click", function () {
+            amountInput.value = this.dataset.amount;
+            validateInput();
+        });
+    });
+
+    amountInput.addEventListener("input", validateInput);
+    txnIdInput.addEventListener("input", validateInput);
+
+    // Pay button action
+    payBtn.addEventListener("click", async function () {
+        const val = parseFloat(amountInput.value) || 0;
+        const txnId = txnIdInput.value.trim();
+
+        if (val < 10) {
+            validationMsg.innerText = "Minimum fund amount is \u20B910";
+            validationMsg.className = "text-xs font-medium text-red-500";
+            return;
+        }
+
+        if (txnId === "") {
+            validationMsg.innerText = "Transaction ID is required";
+            validationMsg.className = "text-xs font-medium text-red-500";
+            return;
+        }
+
+        payBtn.disabled = true;
+        fetch("/api/fund-request", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                amount: val,
+                txn_id: txnId
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById("paymentModal").classList.remove("hidden");
+            } else {
+                validationMsg.innerText = data.error || "Request failed";
+                validationMsg.className = "text-xs font-medium text-red-500";
+            }
+        })
+    .catch(() => {
+        validationMsg.innerText = "Server error. Try again.";
+        validationMsg.className = "text-xs font-medium text-red-500";
+    });
+});
+
+document.getElementById("closeModal").addEventListener("click", () => {
+    document.getElementById("paymentModal").classList.add("hidden");
+    window.location.href = "/dashboard";
+});
+
+});
+</script>
+

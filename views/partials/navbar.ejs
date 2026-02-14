@@ -1,0 +1,135 @@
+<nav id="navbar" class="fixed w-full z-50 top-0 transition-all duration-300 glass-nav">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div id="nav-container" class="flex justify-between items-center h-16 lg:h-20 transition-all">
+
+      <!-- LOGO -->
+      <div
+        class="flex items-center gap-2 cursor-pointer banana-glow-container"
+        onclick="window.location.href='/'"
+      >
+        <div class="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-white/70 border border-white/50 flex items-center justify-center shadow backdrop-blur-sm">
+          <img
+            src="/images/banana-logo.png"
+            alt="Banana SMM Logo"
+            class="w-full h-full object-cover"
+            style="transform:scale(0.9) rotate(-12deg); filter: drop-shadow(0 0 10px rgba(250,204,21,0.6));"
+          />
+        </div>
+
+        <div>
+          <span class="font-extrabold text-lg lg:text-2xl tracking-tight text-slate-900 leading-none block">
+            <%= (data && data.brand_name ? data.brand_name : "Banana SMM") %>
+          </span>
+          <span class="text-[10px] uppercase font-bold tracking-widest text-slate-500">
+            Premium Panel
+          </span>
+        </div>
+      </div>
+
+      <!-- DESKTOP LINKS -->
+      <div class="hidden lg:flex items-center space-x-8">
+        <% if (user) { %>
+          <a href="/dashboard" class="text-sm font-semibold text-slate-700 hover:text-blue-600">Dashboard</a>
+        <% } %>
+        <a href="/#features" class="text-sm font-semibold text-slate-600 hover:text-blue-600">Features</a>
+        <a href="/#services" class="text-sm font-semibold text-slate-600 hover:text-blue-600">Services</a>
+        <a href="/#api" class="text-sm font-semibold text-slate-600 hover:text-blue-600">API</a>
+        <a href="/#tutorial" class="text-sm font-semibold text-slate-600 hover:text-blue-600">Tutorial</a>
+        <a href="/#faq" class="text-sm font-semibold text-slate-600 hover:text-blue-600">FAQ</a>
+      </div>
+
+      <!-- RIGHT SIDE -->
+      <div class="flex items-center gap-3">
+        <% if (user) { %>
+  <!-- DESKTOP BALANCE -->
+  <div class="hidden lg:flex items-center bg-slate-900 text-white text-sm font-bold px-4 py-2 rounded-full">
+    ₹<%= Number(user.balance || 0).toFixed(2) %>
+  </div>
+
+  <!-- DESKTOP LOGOUT -->
+  <a
+    href="/logout"
+    class="hidden lg:inline-flex bg-slate-900 hover:bg-slate-800 text-white text-sm font-bold py-3 px-6 rounded-full shadow-lg transition-all"
+  >
+    Logout
+  </a>
+<% } %>
+
+
+        <% if (!user) { %>
+          <!-- MOBILE LOGIN -->
+          <a
+            href="/auth"
+            class="lg:hidden bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-5 py-2.5 rounded-full shadow-lg"
+          >
+            Login
+          </a>
+
+          <!-- DESKTOP LOGIN -->
+          <a
+            href="/auth"
+            class="hidden lg:block text-sm font-bold text-slate-700 hover:text-blue-600"
+          >
+            Login
+          </a>
+
+          <!-- DESKTOP CTA -->
+          <a
+            href="/auth"
+            class="hidden lg:inline-flex bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-3 px-6 rounded-full shadow-lg"
+          >
+            Get Started
+          </a>
+        <% } %>
+
+        <!-- HAMBURGER -->
+        <button
+          id="mobile-menu-btn"
+          class="lg:hidden w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 text-slate-700 text-xl active:scale-90"
+        >
+          <i class="fa-solid fa-bars"></i>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MOBILE MENU -->
+  <div
+    id="mobile-menu"
+    class="hidden lg:hidden bg-white border-t border-slate-100 absolute w-full left-0 top-20 shadow-xl"
+  >
+    <div class="flex flex-col p-4 space-y-4">
+
+      <% if (user) { %>
+        <a href="/dashboard" class="font-bold text-slate-800">Dashboard</a>
+      <% } %>
+
+      <a href="/#features" class="text-slate-600 font-semibold">Features</a>
+      <a href="/#services" class="text-slate-600 font-semibold">Services</a>
+      <a href="/#api" class="text-slate-600 font-semibold">API</a>
+      <a href="/#reviews" class="text-slate-600 font-semibold">Reviews</a>
+
+      <% if (user) { %>
+<a
+  href="/logout"
+   class="inline-flex mx-auto items-center justify-center
+         bg-slate-900 text-white
+         px-8 py-3
+         rounded-full
+         text-sm font-semibold
+         shadow-sm
+         active:scale-95 transition"
+>
+  Logout
+</a>
+
+      <% } else { %>
+        <a href="/auth" class="w-full text-center bg-blue-600 text-white py-3 rounded-lg font-bold">
+          Register for Free
+        </a>
+      <% } %>
+
+    </div>
+  </div>
+</nav>

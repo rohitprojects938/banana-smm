@@ -1,0 +1,36 @@
+<div class="container py-12">
+    <div class="card">
+        <h2 class="text-2xl font-bold mb-4">Developer API</h2>
+        <p class="text-gray-600 mb-6">Automate your orders using our REST API.</p>
+
+        <div class="bg-gray-900 text-gray-300 p-6 rounded-lg font-mono text-sm overflow-x-auto">
+            <div class="mb-4">
+                <span class="text-purple-400">POST</span> https://yoursite.com/api/v2
+            </div>
+            
+            <div class="text-gray-500 mb-2">// Payload</div>
+            <pre>
+{
+    "key": "<%= user.api_key %>",
+    "action": "add",
+    "service": 1,
+    "link": "https://instagram.com/...",
+    "quantity": 1000
+}
+            </pre>
+
+            <div class="text-gray-500 mt-4 mb-2">// Response</div>
+            <pre>
+{
+    "order": 23501
+}
+            </pre>
+        </div>
+        
+        <div class="mt-6">
+            <label class="font-bold text-gray-700">Your API Key</label>
+            <input type="text" value="<%= user.api_key %>" readonly class="form-control mt-2 bg-gray-100 cursor-not-allowed">
+            <p class="text-xs text-red-500 mt-2">Do not share this key with anyone.</p>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,1055 @@
+<%- include('partials/navbar') %>
+
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title><%= (data && data.brand_name ? data.brand_name : "Banana SMM") %> - India’s Fastest SMM Panel 2026</title>
+
+    <meta name="description" content="<%= (data && data.hero_headline ? data.hero_headline : "Skyrocket Your Social Presence with Banana SMM Instantly") %> - The #1 Trusted SMM Platform in India.">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="/css/style.css">
+
+    <style>
+        :root {
+            --primary: #2563eb; /* Blue */
+            --secondary: #10b981; /* Green */
+            --accent: #facc15; /* Banana Yellow */
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #0f172a;
+            overflow-x: hidden;
+        }
+
+        /* --- Premium Glassmorphism --- */
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
+        }
+
+        /* --- Premium Banana Icon --- */
+        .banana-icon-svg {
+            filter: drop-shadow(0 0 8px rgba(250, 204, 21, 0.6));
+            transition: all 0.3s ease;
+        }
+        
+        .banana-glow-container:hover .banana-icon-svg {
+            filter: drop-shadow(0 0 15px rgba(250, 204, 21, 0.9));
+            transform: scale(1.1) rotate(-5deg);
+        }
+
+        /* --- 3D Background Elements --- */
+        .blob-3d {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.6;
+            z-index: -1;
+            animation: float 10s ease-in-out infinite;
+        }
+        
+        .blob-blue { background: radial-gradient(circle, #3b82f6 0%, transparent 70%); }
+        .blob-green { background: radial-gradient(circle, #10b981 0%, transparent 70%); }
+        .blob-yellow { background: radial-gradient(circle, #facc15 0%, transparent 70%); }
+
+        @keyframes float {
+            0% { transform: translateY(0px) translateX(0px); }
+            33% { transform: translateY(-30px) translateX(20px); }
+            66% { transform: translateY(10px) translateX(-10px); }
+            100% { transform: translateY(0px) translateX(0px); }
+        }
+
+        /* --- Scroll Reveal --- */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.5, 0, 0, 1);
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* --- 3D Dashboard Tilt Effect --- */
+        .hero-dashboard-container {
+            perspective: 1500px;
+            transform-style: preserve-3d;
+        }
+        
+        .card-3d-interactive {
+            transition: transform 0.1s ease-out, box-shadow 0.3s ease;
+            transform-style: preserve-3d;
+            background: rgba(15, 23, 42, 0.95); /* Darker background for contrast */
+        }
+        
+        .card-3d-interactive::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(120deg, rgba(255,255,255,0) 30%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0) 70%);
+            background-size: 200% 200%;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            border-radius: 1rem;
+            z-index: 10;
+        }
+
+        .card-3d-interactive:hover::before {
+            opacity: 1;
+        }
+
+        .card-layer-depth {
+            transform: translateZ(40px);
+        }
+
+        /* --- How It Works Animation --- */
+        .step-line {
+            position: absolute;
+            top: 2rem;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, #334155 0%, #3b82f6 50%, #334155 100%);
+            z-index: 0;
+            background-size: 200% 100%;
+            animation: gradientMove 3s linear infinite;
+        }
+        
+        @keyframes gradientMove {
+            0% { background-position: 100% 0; }
+            100% { background-position: -100% 0; }
+        }
+
+        .step-card:hover .step-icon {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+        }
+
+        /* --- Utilities --- */
+        .hover-lift {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .hover-lift:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px -5px rgba(0,0,0,0.1);
+        }
+
+        /* Code Block Styling */
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        /* FAQ Animation */
+        details > summary { list-style: none; }
+        details > summary::-webkit-details-marker { display: none; }
+        details[open] summary ~ * { animation: sweep .3s ease-in-out; }
+        @keyframes sweep { 0% {opacity: 0; margin-top: -10px} 100% {opacity: 1; margin-top: 0px} }
+    </style>
+</head>
+<body class="antialiased">
+
+
+
+    <section class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden bg-slate-50 hero-dashboard-container">
+        <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+            <div class="blob-3d blob-blue w-[600px] h-[600px] -top-20 -left-20"></div>
+            <div class="blob-3d blob-yellow w-[500px] h-[500px] top-40 right-0 animation-delay-2000"></div>
+            <div class="blob-3d blob-green w-[400px] h-[400px] bottom-0 left-1/3 animation-delay-4000"></div>
+            <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
+            <div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="grid lg:grid-cols-2 gap-16 items-center">
+                
+                <div class="text-center lg:text-left reveal active" style="z-index: 20;">
+                    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 border border-blue-100 text-blue-700 text-xs font-bold mb-8 shadow-sm backdrop-blur-md">
+                        <span class="relative flex h-2.5 w-2.5">
+                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                          <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-blue-600"></span>
+                        </span>
+                        Top Rated SMM Platform - 2026
+                    </div>
+
+                    <h1 class="text-5xl md:text-7xl font-black text-slate-900 tracking-tight mb-6 leading-[1.1]">
+                        <%= (data && data.hero_headline ? data.hero_headline : "Skyrocket Your Social Presence with Banana SMM Instantly") %>
+                    </h1>
+
+                    <p class="mt-6 text-xl text-slate-600 mb-10 leading-relaxed font-medium max-w-lg mx-auto lg:mx-0">
+                        <%= (data && data.hero_subheadline ? data.hero_subheadline : "The secret weapon for 10,000+ Indian Creators & Agencies.") %>
+                    </p>
+
+                    <div class="flex flex-col sm:flex-row justify-center lg:justify-start gap-4 mb-8">
+                        <a href="/auth" class="inline-flex justify-center items-center py-4 px-10 text-lg font-bold text-white bg-blue-600 rounded-full shadow-xl shadow-blue-600/30 hover:bg-blue-700 hover:-translate-y-1 transition-all">
+                            Get Started
+                        </a>
+                        <a href="#services" class="inline-flex justify-center items-center py-4 px-10 text-lg font-bold text-slate-700 bg-white border border-slate-200 rounded-full shadow-md hover:bg-slate-50 transition-all">
+                            Explore Services
+                        </a>
+                    </div>
+
+                    <p class="text-xs text-slate-500 font-medium flex items-center justify-center lg:justify-start gap-4">
+                        <span><i class="fa-solid fa-shield-halved text-emerald-500 mr-1"></i> No Password Required</span>
+                        <span><i class="fa-solid fa-lock text-emerald-500 mr-1"></i> Secure Payments</span>
+                    </p>
+                </div>
+
+                <div class="relative reveal active lg:block hidden">
+                    <div id="hero-dashboard-card" class="card-3d-interactive relative rounded-2xl border border-slate-700/50 shadow-2xl p-2 cursor-pointer">
+                        <div class="bg-slate-800 rounded-t-xl p-3 flex items-center gap-2 border-b border-slate-700">
+                            <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                            <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                            <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                            <div class="ml-4 bg-slate-700 rounded-md px-3 py-1 text-xs text-slate-400 w-full max-w-[200px] font-mono flex items-center">
+                                <i class="fa-solid fa-lock text-[8px] mr-1"></i> bananasmm.com
+                            </div>
+                        </div>
+                        <div class="bg-slate-50 p-6 h-[450px] flex gap-4 overflow-hidden rounded-b-xl relative">
+                            <div class="w-1/4 bg-white rounded-lg shadow-sm p-4 space-y-3 card-layer-depth">
+                                <div class="h-8 bg-blue-50 rounded w-full border-l-4 border-blue-500"></div>
+                                <div class="h-4 bg-slate-100 rounded w-3/4"></div>
+                                <div class="h-4 bg-slate-100 rounded w-full"></div>
+                                <div class="h-4 bg-slate-100 rounded w-2/3"></div>
+                            </div>
+                            <div class="flex-1 space-y-4 card-layer-depth">
+                                <div class="flex gap-4">
+                                    <div class="w-1/2 h-28 bg-gradient-to-br from-blue-600 to-blue-500 rounded-xl shadow-lg p-4 text-white flex flex-col justify-between transform hover:scale-105 transition-transform">
+                                        <div class="text-xs opacity-80 uppercase tracking-wide">Total Balance</div>
+                                        <div class="text-3xl font-bold">₹ 15,420</div>
+                                    </div>
+                                    <div class="w-1/2 h-28 bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex flex-col justify-between transform hover:scale-105 transition-transform">
+                                        <div class="text-xs text-slate-500 uppercase tracking-wide">Total Orders</div>
+                                        <div class="text-3xl font-bold text-slate-800">4,281</div>
+                                    </div>
+                                </div>
+                                <div class="h-64 bg-white rounded-xl shadow-sm border border-slate-200 p-4 relative overflow-hidden">
+                                    <div class="absolute inset-0 bg-slate-50 opacity-50"></div>
+                                    <div class="h-4 bg-slate-200 rounded w-1/3 mb-4 relative z-10"></div>
+                                    <div class="space-y-3 relative z-10">
+                                        <div class="h-10 bg-white border border-slate-100 rounded shadow-sm w-full flex items-center px-4">
+                                            <div class="w-2 h-2 rounded-full bg-green-500 mr-2"></div>
+                                            <div class="h-2 w-20 bg-slate-100 rounded"></div>
+                                        </div>
+                                        <div class="h-10 bg-white border border-slate-100 rounded shadow-sm w-full flex items-center px-4">
+                                            <div class="w-2 h-2 rounded-full bg-blue-500 mr-2"></div>
+                                            <div class="h-2 w-24 bg-slate-100 rounded"></div>
+                                        </div>
+                                        <div class="h-10 bg-white border border-slate-100 rounded shadow-sm w-full flex items-center px-4">
+                                            <div class="w-2 h-2 rounded-full bg-yellow-500 mr-2"></div>
+                                            <div class="h-2 w-16 bg-slate-100 rounded"></div>
+                                        </div>
+                                    </div>
+                                    <div class="absolute bottom-4 right-4 bg-emerald-500 text-white px-4 py-2 rounded-lg shadow-lg text-xs font-bold flex items-center gap-2 animate-bounce card-layer-depth">
+                                        <i class="fa-solid fa-check-circle"></i> Order Completed!
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-20 grid grid-cols-2 md:grid-cols-4 gap-8 border-t border-slate-200 pt-10 reveal">
+                <div class="text-center">
+                    <div class="text-4xl font-black text-slate-900 mb-1">12M+</div>
+                    <div class="text-sm font-semibold text-slate-500 uppercase tracking-wide">Orders Completed</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-4xl font-black text-slate-900 mb-1">0.01s</div>
+                    <div class="text-sm font-semibold text-slate-500 uppercase tracking-wide">Instant Start</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-4xl font-black text-slate-900 mb-1">₹ 1</div>
+                    <div class="text-sm font-semibold text-slate-500 uppercase tracking-wide">Starting Price</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-4xl font-black text-slate-900 mb-1">24/7</div>
+                    <div class="text-sm font-semibold text-slate-500 uppercase tracking-wide">Support Team</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-12 bg-white border-b border-slate-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <p class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-6">Trusted by 10,000+ Marketers in India</p>
+            <div class="flex flex-wrap justify-center gap-4 mb-8">
+                <span class="px-4 py-2 bg-slate-100 rounded-full text-slate-600 font-semibold text-sm">📺 Creators</span>
+                <span class="px-4 py-2 bg-slate-100 rounded-full text-slate-600 font-semibold text-sm">🚀 Agencies</span>
+                <span class="px-4 py-2 bg-slate-100 rounded-full text-slate-600 font-semibold text-sm">🏢 Brands</span>
+                <span class="px-4 py-2 bg-slate-100 rounded-full text-slate-600 font-semibold text-sm">💻 Freelancers</span>
+            </div>
+            <div class="inline-flex items-center gap-2 text-yellow-500 text-lg font-bold">
+                <div class="flex"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star-half-stroke"></i></div>
+                <span class="text-slate-700 text-base">4.8/5 Average Rating</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-24 bg-white reveal">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-slate-900">Most SMM sellers are risky. <br> We are built for trust.</h2>
+            </div>
+            <div class="grid md:grid-cols-2 gap-12">
+                <div class="bg-red-50 rounded-2xl p-8 border border-red-100">
+                    <h3 class="text-xl font-bold text-red-600 mb-6 flex items-center gap-2"><i class="fa-solid fa-triangle-exclamation"></i> Other Panels</h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-center gap-3 text-slate-700"><i class="fa-solid fa-xmark text-red-500 text-lg w-6"></i> Slow delivery & delays</li>
+                        <li class="flex items-center gap-3 text-slate-700"><i class="fa-solid fa-xmark text-red-500 text-lg w-6"></i> Frequent drops in followers</li>
+                        <li class="flex items-center gap-3 text-slate-700"><i class="fa-solid fa-xmark text-red-500 text-lg w-6"></i> No customer support replies</li>
+                        <li class="flex items-center gap-3 text-slate-700"><i class="fa-solid fa-xmark text-red-500 text-lg w-6"></i> High risk of scams</li>
+                    </ul>
+                </div>
+                <div class="bg-emerald-50 rounded-2xl p-8 border border-emerald-100 shadow-lg relative overflow-hidden">
+                    <div class="absolute top-0 right-0 bg-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">Recommended</div>
+                    <h3 class="text-xl font-bold text-emerald-600 mb-6 flex items-center gap-2"><i class="fa-solid fa-seedling"></i> Banana SMM</h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-center gap-3 text-slate-700"><i class="fa-solid fa-check text-emerald-500 text-lg w-6"></i> Instant automated start</li>
+                        <li class="flex items-center gap-3 text-slate-700"><i class="fa-solid fa-check text-emerald-500 text-lg w-6"></i> 30-Day Refill Guarantee</li>
+                        <li class="flex items-center gap-3 text-slate-700"><i class="fa-solid fa-check text-emerald-500 text-lg w-6"></i> Dedicated Ticket System</li>
+                        <li class="flex items-center gap-3 text-slate-700"><i class="fa-solid fa-check text-emerald-500 text-lg w-6"></i> Live Order Tracking</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="features" class="py-24 bg-slate-50 reveal">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-blue-600 font-bold tracking-wide uppercase text-sm mb-2">Premium Features</h2>
+                <h3 class="text-3xl font-bold text-slate-900">Why India Chooses Banana SMM</h3>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="glass-card bg-white p-8 rounded-2xl hover-lift group">
+                    <div class="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600 text-2xl mb-6 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                        <i class="fa-solid fa-bolt"></i>
+                    </div>
+                    <h4 class="text-lg font-bold text-slate-900 mb-2">Instant Delivery</h4>
+                    <p class="text-slate-600 text-sm">System processes your order the moment you click buy.</p>
+                </div>
+                <div class="glass-card bg-white p-8 rounded-2xl hover-lift group">
+                    <div class="w-14 h-14 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-600 text-2xl mb-6 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                        <i class="fa-solid fa-arrows-rotate"></i>
+                    </div>
+                    <h4 class="text-lg font-bold text-slate-900 mb-2">Non-Drop + Refill</h4>
+                    <p class="text-slate-600 text-sm">High quality services with auto-refill button enabled.</p>
+                </div>
+                <div class="glass-card bg-white p-8 rounded-2xl hover-lift group">
+                    <div class="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center text-purple-600 text-2xl mb-6 group-hover:bg-purple-600 group-hover:text-white transition-colors">
+                        <i class="fa-solid fa-code"></i>
+                    </div>
+                    <h4 class="text-lg font-bold text-slate-900 mb-2">API Support</h4>
+                    <p class="text-slate-600 text-sm">Connect your panel easily. Compatible with all scripts.</p>
+                </div>
+                <div class="glass-card bg-white p-8 rounded-2xl hover-lift group">
+                    <div class="w-14 h-14 bg-orange-100 rounded-xl flex items-center justify-center text-orange-600 text-2xl mb-6 group-hover:bg-orange-600 group-hover:text-white transition-colors">
+                        <i class="fa-solid fa-indian-rupee-sign"></i>
+                    </div>
+                    <h4 class="text-lg font-bold text-slate-900 mb-2">Secure Payments</h4>
+                    <p class="text-slate-600 text-sm">Add funds via UPI, Paytm, PhonePe, Cards securely.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="services" class="py-24 bg-white reveal">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-slate-900">Explore Our Premium Services</h2>
+                <p class="mt-4 text-slate-600">Select a platform to view services</p>
+            </div>
+
+            <div class="flex flex-wrap justify-center gap-2 mb-12" id="service-tabs">
+                <button class="tab-btn active px-6 py-2 rounded-full font-semibold text-sm transition-all bg-blue-600 text-white shadow-lg shadow-blue-500/30" data-target="instagram">Instagram</button>
+                <button class="tab-btn px-6 py-2 rounded-full font-semibold text-sm transition-all bg-slate-100 text-slate-600 hover:bg-slate-200" data-target="youtube">YouTube</button>
+                <button class="tab-btn px-6 py-2 rounded-full font-semibold text-sm transition-all bg-slate-100 text-slate-600 hover:bg-slate-200" data-target="telegram">Telegram</button>
+                <button class="tab-btn px-6 py-2 rounded-full font-semibold text-sm transition-all bg-slate-100 text-slate-600 hover:bg-slate-200" data-target="twitter">Twitter (X)</button>
+            </div>
+
+            <div id="services-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                </div>
+
+            <div class="text-center mt-12">
+                <a href="/auth" class="inline-flex items-center gap-2 text-blue-600 font-bold hover:text-blue-700 transition">
+                    View All 500+ Services <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section id="tutorial" class="py-24 bg-slate-900 text-white relative overflow-x-hidden overflow-y-visible">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="text-center mb-20">
+                <h2 class="text-3xl font-bold">How It Works</h2>
+                <p class="text-slate-400 mt-2">Get viral in just 3 simple steps</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
+                <div class="step-line hidden md:block"></div>
+                
+                
+                <div class="text-center relative z-10 reveal-step group cursor-default">
+                    <div class="w-20 h-20 mx-auto bg-slate-800 border-4 border-blue-500 rounded-full flex items-center justify-center text-2xl font-bold mb-6 group-hover:scale-110 group-hover:shadow-[0_0_30px_rgba(59,130,246,0.6)] transition-all duration-300">
+                        <i class="fa-solid fa-user-plus text-blue-400"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">Create Account</h3>
+                    <p class="text-slate-400 text-sm">Sign up for free in 30 seconds.</p>
+                </div>
+
+                <div class="text-center relative z-10 reveal-step group cursor-default" style="animation-delay: 200ms;">
+                    <div class="w-20 h-20 mx-auto bg-slate-800 border-4 border-yellow-500 rounded-full flex items-center justify-center text-2xl font-bold mb-6 group-hover:scale-110 group-hover:shadow-[0_0_30px_rgba(234,179,8,0.6)] transition-all duration-300">
+                        <i class="fa-solid fa-wallet text-yellow-400"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">Add Funds</h3>
+                    <p class="text-slate-400 text-sm">Deposit via UPI or Card securely.</p>
+                </div>
+
+                <div class="text-center relative z-10 reveal-step group cursor-default" style="animation-delay: 400ms;">
+                    <div class="w-20 h-20 mx-auto bg-slate-800 border-4 border-emerald-500 rounded-full flex items-center justify-center text-2xl font-bold mb-6 group-hover:scale-110 group-hover:shadow-[0_0_30px_rgba(16,185,129,0.6)] transition-all duration-300">
+                        <i class="fa-solid fa-rocket text-emerald-400"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">Place Order & Track</h3>
+                    <p class="text-slate-400 text-sm">Select service and watch it grow.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="api" class="py-24 bg-white reveal">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid lg:grid-cols-2 gap-16">
+                <div>
+                    <h2 class="text-3xl font-bold text-slate-900 mb-6">Built for Resellers & Developers</h2>
+                    <p class="text-slate-600 mb-8">Whether you are a freelancer managing clients or a developer building your own SMM panel, Banana SMM has the tools you need.</p>
+                    
+                    <ul class="space-y-4 mb-8">
+                        <li class="flex items-center gap-3">
+                            <i class="fa-solid fa-circle-check text-green-500"></i>
+                            <span class="font-semibold text-slate-700">Mass Order Processing</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i class="fa-solid fa-circle-check text-green-500"></i>
+                            <span class="font-semibold text-slate-700">Drip-feed Automated Growth</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i class="fa-solid fa-circle-check text-green-500"></i>
+                            <span class="font-semibold text-slate-700">Cancel & Refill Buttons</span>
+                        </li>
+                    </ul>
+                    <a href="/auth" class="inline-block bg-slate-900 text-white px-8 py-3 rounded-lg font-bold hover:bg-slate-800 transition">Try Dashboard Demo</a>
+                </div>
+
+                <div class="bg-slate-900 rounded-2xl p-8 shadow-2xl relative overflow-hidden">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-white font-bold text-xl"><i class="fa-solid fa-code mr-2 text-blue-500"></i> API Integration</h3>
+                        <span class="text-xs bg-blue-600/20 text-blue-400 px-2 py-1 rounded">V2 Compatible</span>
+                    </div>
+                    <div class="relative group">
+                        <pre class="text-xs text-blue-300 leading-relaxed">
+<span class="text-purple-400">POST</span> /api/v2
+{
+  <span class="text-emerald-400">"key"</span>: "YOUR_API_KEY",
+  <span class="text-emerald-400">"action"</span>: "add",
+  <span class="text-emerald-400">"service"</span>: 125,
+  <span class="text-emerald-400">"link"</span>: "https://instagram.com/user",
+  <span class="text-emerald-400">"quantity"</span>: 1000
+}
+                        </pre>
+                        <button onclick="copyCode()" class="absolute top-2 right-2 bg-slate-700 text-white text-xs px-3 py-1 rounded hover:bg-slate-600 transition">Copy</button>
+                    </div>
+                    <p class="text-slate-400 text-xs mt-6">Connect seamlessly with any SMM script (Perfect Panel, SmartPanel, etc.)</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="reviews" class="py-24 bg-slate-50 reveal">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-12">
+                <div>
+                    <h2 class="text-3xl font-bold text-slate-900">Loved by India's Creators</h2>
+                    <p class="mt-2 text-slate-600">Rated 4.8/5 by 10,000+ Happy Customers</p>
+                </div>
+                <div class="flex items-center gap-2 mt-4 md:mt-0">
+                    <div class="flex -space-x-2">
+                        <img src="https://i.pravatar.cc/100?img=11" class="w-10 h-10 rounded-full border-2 border-white" alt="User">
+                        <img src="https://i.pravatar.cc/100?img=32" class="w-10 h-10 rounded-full border-2 border-white" alt="User">
+                        <img src="https://i.pravatar.cc/100?img=12" class="w-10 h-10 rounded-full border-2 border-white" alt="User">
+                        <div class="w-10 h-10 rounded-full border-2 border-white bg-blue-100 flex items-center justify-center text-xs font-bold text-blue-600">+2k</div>
+                    </div>
+                    <span class="text-sm font-semibold text-slate-600 ml-2">Real Reviews</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 relative">
+                    <i class="fa-solid fa-quote-right absolute top-8 right-8 text-slate-100 text-4xl"></i>
+                    <div class="flex text-yellow-400 text-sm mb-4">
+                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                    </div>
+                    <p class="text-slate-600 mb-6 italic">"Bhai best panel hai! Maine Instagram followers order kiye the aur 5 min me start ho gaye. Rates bhi sabse cheap hain."</p>
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold">AS</div>
+                        <div>
+                            <h4 class="font-bold text-slate-900 text-sm">Aman Sharma</h4>
+                            <p class="text-xs text-slate-500">New Delhi</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 relative">
+                    <i class="fa-solid fa-quote-right absolute top-8 right-8 text-slate-100 text-4xl"></i>
+                    <div class="flex text-yellow-400 text-sm mb-4">
+                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                    </div>
+                    <p class="text-slate-600 mb-6 italic">"Support team bahot fast hai. WhatsApp par turant reply milta hai. YouTube watchtime service is awesome for monetization."</p>
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 bg-pink-100 rounded-full flex items-center justify-center text-pink-600 font-bold">NV</div>
+                        <div>
+                            <h4 class="font-bold text-slate-900 text-sm">Neha Verma</h4>
+                            <p class="text-xs text-slate-500">Mumbai</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 relative">
+                    <i class="fa-solid fa-quote-right absolute top-8 right-8 text-slate-100 text-4xl"></i>
+                    <div class="flex text-yellow-400 text-sm mb-4">
+                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star-half-stroke"></i>
+                    </div>
+                    <p class="text-slate-600 mb-6 italic">"Sabse badhiya baat ye hai ki ₹ 10 se bhi funds add kar sakte hain UPI se. Small creators ke liye perfect hai Banana SMM."</p>
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-600 font-bold">RS</div>
+                        <div>
+                            <h4 class="font-bold text-slate-900 text-sm">Rohit Singh</h4>
+                            <p class="text-xs text-slate-500">Lucknow</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="max-w-2xl mx-auto bg-blue-600 rounded-2xl p-8 md:p-12 text-white shadow-2xl relative overflow-hidden">
+                <div class="absolute -top-10 -right-10 w-40 h-40 bg-white opacity-10 rounded-full blur-3xl"></div>
+                <h3 class="text-2xl font-bold mb-2">Share Your Feedback</h3>
+                <p class="text-blue-100 text-sm mb-6">Help us improve Banana SMM for you.</p>
+                
+                <form id="feedback-form" class="space-y-4 relative z-10">
+                    <div class="grid grid-cols-2 gap-4">
+                        <input type="text" placeholder="Your Name" class="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-blue-200 focus:outline-none focus:bg-white/20 transition">
+                        <select class="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white focus:outline-none focus:bg-white/20 transition [&>option]:text-slate-900">
+                            <option>5 Stars - Excellent</option>
+                            <option>4 Stars - Good</option>
+                            <option>3 Stars - Average</option>
+                        </select>
+                    </div>
+                    <textarea rows="3" placeholder="Write your suggestion..." class="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-blue-200 focus:outline-none focus:bg-white/20 transition"></textarea>
+                    <button type="button" onclick="submitFeedback()" class="w-full bg-white text-blue-600 font-bold py-3 rounded-lg hover:bg-blue-50 transition shadow-lg">Submit Feedback</button>
+                </form>
+                <div id="feedback-success" class="hidden absolute inset-0 bg-blue-600 z-20 flex flex-col items-center justify-center text-center">
+                    <i class="fa-solid fa-circle-check text-5xl mb-4 text-white"></i>
+                    <h3 class="text-2xl font-bold">Thank You!</h3>
+                    <p>Your feedback has been recorded.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="faq" class="py-24 bg-white reveal">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-slate-900">Frequently Asked Questions</h2>
+            </div>
+
+            <div class="space-y-4">
+                <details class="group bg-slate-50 rounded-xl border border-slate-200 p-4">
+                    <summary class="flex cursor-pointer items-center justify-between font-semibold text-slate-900">
+                        Is Banana SMM safe for my account?
+                        <span class="transition group-open:rotate-180"><i class="fa-solid fa-chevron-down"></i></span>
+                    </summary>
+                    <p class="text-slate-600 text-sm mt-3 leading-relaxed">Yes, 100% safe. We use high-quality profiles and natural delivery methods. We never ask for your password.</p>
+                </details>
+                <details class="group bg-slate-50 rounded-xl border border-slate-200 p-4">
+                    <summary class="flex cursor-pointer items-center justify-between font-semibold text-slate-900">
+                        How can I deposit money?
+                        <span class="transition group-open:rotate-180"><i class="fa-solid fa-chevron-down"></i></span>
+                    </summary>
+                    <p class="text-slate-600 text-sm mt-3 leading-relaxed">We accept UPI (PhonePe, GPay, Paytm), Credit/Debit Cards, and Crypto. Funds are added automatically.</p>
+                </details>
+                <details class="group bg-slate-50 rounded-xl border border-slate-200 p-4">
+                    <summary class="flex cursor-pointer items-center justify-between font-semibold text-slate-900">
+                        What if my followers drop?
+                        <span class="transition group-open:rotate-180"><i class="fa-solid fa-chevron-down"></i></span>
+                    </summary>
+                    <p class="text-slate-600 text-sm mt-3 leading-relaxed">Choose our "Non-Drop" services which come with a 30-day refill guarantee. If drops happen, simply click the refill button.</p>
+                </details>
+                <details class="group bg-slate-50 rounded-xl border border-slate-200 p-4">
+                    <summary class="flex cursor-pointer items-center justify-between font-semibold text-slate-900">
+                        Can I resell these services?
+                        <span class="transition group-open:rotate-180"><i class="fa-solid fa-chevron-down"></i></span>
+                    </summary>
+                    <p class="text-slate-600 text-sm mt-3 leading-relaxed">Absolutely! Thousands of agencies use Banana SMM as their supplier. You can connect via API to resell automatically.</p>
+                </details>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-20 bg-slate-900 relative overflow-hidden">
+        <div class="absolute inset-0 bg-blue-600/10"></div>
+        <div class="absolute -right-20 -bottom-20 w-96 h-96 bg-blue-500 rounded-full blur-[120px] opacity-30"></div>
+        <div class="max-w-4xl mx-auto px-4 text-center relative z-10">
+            <h2 class="text-4xl md:text-5xl font-black text-white mb-6">
+                Start Growing Today with <span class="text-yellow-400"><%= (data && data.brand_name ? data.brand_name : "Banana SMM") %></span>
+            </h2>
+            <p class="text-slate-300 text-lg mb-8">Join the fastest growing SMM network in India. Fast delivery, secure payments, and unbeatable prices.</p>
+            <a href="/auth" class="inline-block bg-yellow-400 hover:bg-yellow-300 text-slate-900 text-lg font-bold py-4 px-12 rounded-full shadow-xl shadow-yellow-400/20 transform hover:-translate-y-1 transition-all">
+                Create Free Account
+            </a>
+            <p class="text-slate-500 text-sm mt-6">No credit card required. Sign up in 30 seconds.</p>
+        </div>
+    </section>
+
+
+
+    <div id="supportModal" class="fixed inset-0 z-50 hidden bg-black/50 flex items-center justify-center px-4">
+  <div
+  id="supportModalBox"
+  class="bg-white w-full max-w-sm rounded-2xl shadow-xl p-5 relative transform scale-90 opacity-0 transition-all duration-300"
+>
+
+
+    <button id="closeSupportModal" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-xl">
+      ×
+    </button>
+
+    <div class="text-center mb-6">
+      <i class="fa-brands fa-whatsapp text-green-500 text-4xl mb-2"></i>
+      <h3 class="text-xl font-bold text-slate-900">Contact Support</h3>
+      <p class="text-sm text-slate-500 mt-1">
+        Secure support. No phone number required.
+      </p>
+    </div>
+
+    <form id="supportForm" class="space-y-4">
+      <input
+        type="text"
+        placeholder="Your name"
+        required
+        class="w-full border border-slate-200 rounded-xl px-4 py-3"
+      />
+
+      <input
+        type="email"
+        placeholder="Your email"
+        required
+        class="w-full border border-slate-200 rounded-xl px-4 py-3"
+      />
+
+      <textarea
+        rows="4"
+        placeholder="How can we help you?"
+        required
+        class="w-full border border-slate-200 rounded-xl px-4 py-3"
+      ></textarea>
+
+      <div class="mt-4 text-center">
+  <p class="text-xs text-slate-500 mb-2">Prefer instant help?</p>
+  <a
+    href="https://www.instagram.com/m/2928999_._"
+    target="_blank"
+    rel="noopener noreferrer"
+    class="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 hover:underline"
+  >
+    <i class="fa-brands fa-instagram"></i>
+    Chat with our live human agent
+  </a>
+</div>
+
+
+      <button
+        type="submit"
+        class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 rounded-xl"
+      >
+        Send Message
+      </button>
+    </form>
+
+    <p class="text-[11px] text-slate-400 text-center mt-4">
+      Our team usually replies within minutes.
+    </p>
+  </div>
+</div>
+
+
+    <footer class="bg-slate-950 text-slate-400 py-16 border-t border-slate-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+                <div class="col-span-1 md:col-span-1">
+                    <div class="flex items-center gap-2 text-white mb-4">
+                        <div class="w-8 h-8 flex items-center justify-center">
+                           <img
+  src="/images/banana-logo.png"
+  alt="Banana SMM Logo"
+  class="w-6 h-6 object-contain"
+  style="transform: scale(2) scaleX(1) rotate(-12deg) translateX(-2px); filter: drop-shadow(0 0 10px rgba(250,204,21,0.6));"
+/>
+
+                        </div>
+                        <span class="font-bold text-xl"><%= (data && data.brand_name ? data.brand_name : "Banana SMM") %></span>
+                    </div>
+                    <p class="text-sm leading-relaxed mb-4">India's most trusted and cheapest SMM panel for resellers. Automated growth solutions for everyone.</p>
+                    <div class="flex gap-4">
+                        <a href="#" class="w-8 h-8 rounded bg-slate-800 flex items-center justify-center hover:bg-blue-600 hover:text-white transition"><i class="fa-brands fa-instagram"></i></a>
+                        <a href="#" class="w-8 h-8 rounded bg-slate-800 flex items-center justify-center hover:bg-blue-500 hover:text-white transition"><i class="fa-brands fa-telegram"></i></a>
+                        <a href="#" class="w-8 h-8 rounded bg-slate-800 flex items-center justify-center hover:bg-red-600 hover:text-white transition"><i class="fa-brands fa-youtube"></i></a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="text-white font-bold mb-6">Quick Links</h4>
+                    <ul class="space-y-3 text-sm">
+                        <li><a href="/" class="hover:text-white transition">Home</a></li>
+                        <li><a href="#services" class="hover:text-white transition">Services</a></li>
+                        <li><a href="/api" class="hover:text-white transition">API Docs</a></li>
+                        <li><a href="/auth" class="hover:text-white transition">Login / Sign Up</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-white font-bold mb-6">Support</h4>
+                    <ul class="space-y-3 text-sm">
+                        <li><a href="#" class="hover:text-white transition">Help Center</a></li>
+                        <li><a href="#" class="hover:text-white transition">Ticket System</a></li>
+                        <li><a href="#" class="hover:text-white transition">WhatsApp Support</a></li>
+                        <li><a href="#" class="hover:text-white transition">System Status</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-white font-bold mb-6">Legal</h4>
+                    <ul class="space-y-3 text-sm">
+                        <li><a href="/terms" class="hover:text-white transition">Terms of Service</a></li>
+                        <li><a href="/privacy" class="hover:text-white transition">Privacy Policy</a></li>
+                        <li><a href="/refund" class="hover:text-white transition">Refund Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-slate-900 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+                <p class="text-sm">© 2026 <%= (data && data.brand_name ? data.brand_name : "Banana SMM") %>. All rights reserved.</p>
+                <p class="text-xs text-slate-600">Made with <i class="fa-solid fa-heart text-red-500"></i> in India</p>
+            </div>
+        </div>
+    </footer>
+
+  <button
+  id="openSupportModal"
+  class="fixed bottom-6 right-6 bg-green-500 text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center text-3xl hover:bg-green-600 hover:-translate-y-1 transition z-50 animate-bounce"
+  title="Chat with Support"
+>
+  <i class="fa-brands fa-whatsapp"></i>
+</button>
+
+
+    <script>
+        // 1. Mobile Menu Toggle
+        const btn = document.getElementById('mobile-menu-btn');
+        const menu = document.getElementById('mobile-menu');
+
+        btn.addEventListener('click', () => {
+            menu.classList.toggle('hidden');
+        });
+
+        // 2. Navbar Scroll Effect
+        window.addEventListener('scroll', () => {
+            const navbar = document.getElementById('navbar');
+            const navContainer = document.getElementById('nav-container');
+            if (window.scrollY > 20) {
+                navbar.classList.add('shadow-md', 'bg-white/90');
+                navbar.classList.remove('glass-nav');
+                navContainer.classList.remove('h-20');
+                navContainer.classList.add('h-16');
+            } else {
+                navbar.classList.remove('shadow-md', 'bg-white/90');
+                navbar.classList.add('glass-nav');
+                navContainer.classList.add('h-20');
+                navContainer.classList.remove('h-16');
+            }
+        });
+
+        // 3. Scroll Reveal Animation
+        const revealElements = document.querySelectorAll('.reveal');
+        const revealElementsSteps = document.querySelectorAll('.reveal-step');
+        
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if(entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+
+        revealElements.forEach(el => revealObserver.observe(el));
+        revealElementsSteps.forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'all 0.6s ease-out';
+            revealObserver.observe(el);
+        });
+
+        // 4. Service Tabs Logic (NO PRICING, ONLY BADGES)
+        const servicesData = {
+            instagram: [
+                                    {
+                        icon: 'fa-instagram',
+                        color: 'text-pink-600',
+                        name: 'Instagram Followers',
+                        badge: 'Fast',
+                        highlight: 'Starting From',
+                        price: '₹69 / 1000'
+                        },
+
+               {
+                    icon: 'fa-instagram',
+                    color: 'text-pink-600',
+                    name: 'Instagram Likes',
+                    badge: 'Instant',
+                    highlight: 'Best Price',
+                    price: '₹11 / 1000'
+                    },
+                { icon: 'fa-instagram', color: 'text-pink-600', name: 'Instagram Reels Views', badge: 'Viral', highlight: 'Cheapest',  price: '₹0.45 / 1000' },
+                                    {
+                    icon: 'fa-instagram',
+                    color: 'text-pink-600',
+                    name: 'Instagram Comments',
+                    badge: 'Real',
+                    highlight: 'Custom & Safe',
+                    price: '₹29 / 1000'
+                    },
+                                                        {
+                    icon: 'fa-instagram',
+                    color: 'text-pink-600',
+                    name: 'IG Story Views',
+                    badge: 'Fast',
+                    highlight: 'Instant Start',
+                    price: '₹0.90 / 1000'
+                    },
+
+                                    {
+                    icon: 'fa-instagram',
+                    color: 'text-pink-600',
+                    name: 'IG Saves / Shares',
+                    badge: 'Organic',
+                    highlight: 'Algorithm Boost',
+                    price: '₹1.20 / 1000'
+                    },
+            ],
+            youtube: [
+                { icon: 'fa-youtube', color: 'text-red-600', name: 'YouTube Subscribers', badge: 'Non-Drop' },
+                { icon: 'fa-youtube', color: 'text-red-600', name: 'YouTube Views', badge: 'Retention' },
+                { icon: 'fa-youtube', color: 'text-red-600', name: 'YouTube Watchtime', badge: 'Monetizable' },
+                { icon: 'fa-youtube', color: 'text-red-600', name: 'YouTube Likes', badge: 'Fast' },
+                { icon: 'fa-youtube', color: 'text-red-600', name: 'YouTube Shorts Views', badge: 'Viral' },
+                { icon: 'fa-youtube', color: 'text-red-600', name: 'YouTube Shares', badge: 'Real' },
+            ],
+            telegram: [
+                { icon: 'fa-telegram', color: 'text-blue-500', name: 'Telegram Members', badge: 'Fast' },
+                { icon: 'fa-telegram', color: 'text-blue-500', name: 'Telegram Post Views', badge: 'Instant' },
+                { icon: 'fa-telegram', color: 'text-blue-500', name: 'Telegram Reactions', badge: 'Real' },
+                { icon: 'fa-telegram', color: 'text-blue-500', name: 'Telegram Votes', badge: 'Contest' },
+                { icon: 'fa-telegram', color: 'text-blue-500', name: 'Indian Members', badge: 'Targeted' },
+                { icon: 'fa-telegram', color: 'text-blue-500', name: 'Non-Drop Members', badge: 'Guaranteed' },
+            ],
+            twitter: [
+                { icon: 'fa-x-twitter', color: 'text-slate-900', name: 'X Followers', badge: 'Fast' },
+                { icon: 'fa-x-twitter', color: 'text-slate-900', name: 'X Likes', badge: 'Real' },
+                { icon: 'fa-x-twitter', color: 'text-slate-900', name: 'X Retweets', badge: 'Instant' },
+                { icon: 'fa-x-twitter', color: 'text-slate-900', name: 'X Views', badge: 'High Quality' },
+                { icon: 'fa-x-twitter', color: 'text-slate-900', name: 'X Comments', badge: 'Custom' },
+                { icon: 'fa-x-twitter', color: 'text-slate-900', name: 'NFT Likes', badge: 'Crypto' },
+            ]
+        };
+
+        const grid = document.getElementById('services-grid');
+        const tabs = document.querySelectorAll('.tab-btn');
+function renderServices(category) {
+  grid.innerHTML = servicesData[category].map(item => `
+    <div class="bg-white border border-slate-100 rounded-xl p-6 hover:shadow-lg transition-all hover:-translate-y-1 group">
+      
+      <div class="flex items-center justify-between mb-3">
+        <i class="fa-brands ${item.icon} text-3xl ${item.color} group-hover:scale-110 transition-transform"></i>
+        <span class="bg-blue-50 text-blue-600 text-xs font-bold px-2 py-1 rounded">
+          ${item.badge}
+        </span>
+      </div>
+
+      <h3 class="font-bold text-slate-800 text-lg mb-1">
+        ${item.name}
+      </h3>
+
+      ${item.price ? `
+        <p class="text-sm text-slate-500 mb-3">
+          <span class="font-semibold text-green-600">${item.highlight}</span> • ${item.price}
+        </p>
+      ` : ''}
+
+      <div class="flex justify-end">
+        <a href="/auth" class="text-sm font-semibold text-blue-600 hover:underline">
+          Order →
+        </a>
+      </div>
+
+    </div>
+  `).join('');
+}
+
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => {
+                    t.classList.remove('bg-blue-600', 'text-white', 'shadow-lg');
+                    t.classList.add('bg-slate-100', 'text-slate-600');
+                });
+                tab.classList.add('bg-blue-600', 'text-white', 'shadow-lg');
+                tab.classList.remove('bg-slate-100', 'text-slate-600');
+                renderServices(tab.dataset.target);
+            });
+        });
+
+        // Initial Render
+        renderServices('instagram');
+
+        // 5. Feedback Form Submit
+        function submitFeedback() {
+            const form = document.getElementById('feedback-form');
+            const success = document.getElementById('feedback-success');
+            form.classList.add('opacity-0', 'pointer-events-none');
+            success.classList.remove('hidden');
+        }
+
+        // 6. Copy Code
+        function copyCode() {
+            navigator.clipboard.writeText('API Key Copied!');
+            alert('Code copied to clipboard');
+        }
+
+       // 7. 3D HERO DASHBOARD TILT SCRIPT
+
+       
+const card = document.getElementById('hero-dashboard-card');
+
+if(card) {
+    card.addEventListener('mousemove', (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+
+        const centerX = rect.width / 2;
+
+        const rotateX = 0; 
+        const rotateY = ((x - centerX) / centerX) * 10;
+
+        card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+    });
+
+    card.addEventListener('mouseleave', () => {
+        card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+    });
+}
+
+
+
+ // Mobile menu auto close on link click
+  const mobileLinks = document.querySelectorAll('#mobile-menu a');
+
+  mobileLinks.forEach(link => {
+    link.addEventListener('click', () => {
+      const menu = document.getElementById('mobile-menu');
+      menu.classList.add('hidden');
+    });
+  });
+
+
+    </script>
+    <script>
+  const openBtn = document.getElementById("openSupportModal");
+  const closeBtn = document.getElementById("closeSupportModal");
+  const modal = document.getElementById("supportModal");
+  
+ closeBtn.addEventListener("click", () => {
+  const box = document.getElementById("supportModalBox");
+
+  box.classList.add("scale-90", "opacity-0");
+  box.classList.remove("scale-100", "opacity-100");
+
+  setTimeout(() => {
+    modal.classList.add("hidden");
+  }, 200);
+});
+
+
+openBtn.addEventListener("click", () => {
+  modal.classList.remove("hidden");
+
+  setTimeout(() => {
+    document.getElementById("supportModalBox")
+      .classList.remove("scale-90", "opacity-0");
+    document.getElementById("supportModalBox")
+      .classList.add("scale-100", "opacity-100");
+  }, 10);
+});
+
+
+  closeBtn.addEventListener("click", () => {
+    modal.classList.add("hidden");
+  });
+
+  modal.addEventListener("click", (e) => {
+  if (e.target === modal) {
+    const box = document.getElementById("supportModalBox");
+
+    box.classList.add("scale-90", "opacity-0");
+    box.classList.remove("scale-100", "opacity-100");
+
+    setTimeout(() => {
+      modal.classList.add("hidden");
+    }, 200);
+  }
+});
+
+  document.getElementById("supportForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    alert("Message received. Our support team will contact you shortly.");
+    modal.classList.add("hidden");
+  });
+</script>
+
+</body>
+</html>

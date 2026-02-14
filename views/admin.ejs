@@ -1,0 +1,300 @@
+<div class="container py-12">
+
+    <!-- HEADER -->
+    <div class="flex justify-between items-center mb-8">
+        <h2 class="text-3xl font-bold text-gray-800">Admin Control</h2>
+        <span class="bg-red-100 text-red-600 px-3 py-1 rounded text-sm font-bold">Super Admin</span>
+    </div>
+
+    <!-- ===================== -->
+    <!-- TOP ANALYTICS CARDS -->
+    <!-- ===================== -->
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+
+        <div class="bg-white rounded-2xl shadow p-6">
+            <p class="text-sm text-gray-500">Today Orders</p>
+            <p class="text-3xl font-bold"><%= todayOrders || 0 %></p>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow p-6">
+            <p class="text-sm text-gray-500">Today Revenue</p>
+            <p class="text-3xl font-bold text-green-600">
+                ₹<%= Number(todayRevenue||0).toFixed(2) %>
+            </p>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow p-6">
+            <p class="text-sm text-gray-500">Total Users</p>
+            <p class="text-3xl font-bold text-blue-600">
+                <%= users?.length || 0 %>
+            </p>
+        </div>
+
+    </div>
+
+    <!-- ===================== -->
+    <!-- PROFIT + PROVIDER -->
+    <!-- ===================== -->
+
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+
+        <div class="bg-white rounded-2xl shadow p-6">
+            <p class="text-sm text-gray-500">Total Revenue</p>
+            <p class="text-xl font-bold text-blue-600">
+                ₹<%= Number(totalRevenue||0).toFixed(2) %>
+            </p>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow p-6">
+            <p class="text-sm text-gray-500">Provider Cost</p>
+            <p class="text-xl font-bold text-orange-600">
+                ₹<%= Number(providerCost||0).toFixed(2) %>
+            </p>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow p-6">
+            <p class="text-sm text-gray-500">Net Profit</p>
+            <p class="text-xl font-bold text-green-700">
+                ₹<%= Number(totalProfit||0).toFixed(2) %>
+            </p>
+        </div>
+
+        <div class="bg-black text-white rounded-2xl p-6">
+            <p class="text-sm opacity-70">Provider Balance</p>
+            <p class="text-xl font-bold">
+                $<%= providerBalance || 'N/A' %>
+            </p>
+        </div>
+
+    </div>
+
+    <!-- ===================== -->
+    <!-- CHARTS -->
+    <!-- ===================== -->
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+
+        <div class="bg-white p-6 rounded-2xl shadow">
+            <h3 class="font-bold mb-4">Orders Last 7 Days</h3>
+            <canvas id="ordersChart"></canvas>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow">
+            <h3 class="font-bold mb-4">Order Status</h3>
+            <canvas id="statusChart"></canvas>
+        </div>
+
+    </div>
+
+    <!-- ===================== -->
+    <!-- SERVICE REVENUE -->
+    <!-- ===================== -->
+
+    <div class="bg-white p-6 rounded-2xl shadow mb-12">
+        <h3 class="font-bold mb-4">Revenue by Service</h3>
+        <canvas id="serviceRevenueChart"></canvas>
+    </div>
+
+    <!-- ===================== -->
+    <!-- TOP USERS -->
+    <!-- ===================== -->
+
+    <div class="bg-white rounded-2xl shadow p-6 mb-12">
+        <h3 class="font-bold mb-4">Top Spending Users</h3>
+
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="text-gray-500">
+                    <th class="p-2 text-left">User</th>
+                    <th class="p-2 text-left">Spend</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% (topUsers || []).forEach(u => { %>
+                    <tr class="border-b">
+                        <td class="p-2"><%= u.username %></td>
+                        <td class="p-2 font-bold">
+                            ₹<%= Number(u.spend).toFixed(2) %>
+                        </td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ===================== -->
+    <!-- PROVIDERS -->
+    <!-- ===================== -->
+
+    <div class="card mb-10">
+        <h3 class="text-xl font-bold mb-4">Providers</h3>
+
+        <table class="w-full text-sm">
+            <thead class="bg-gray-100">
+                <tr>
+                    <th class="p-2">Name</th>
+                    <th class="p-2">Balance</th>
+                    <th class="p-2">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% (providers||[]).forEach(p => { %>
+                    <tr class="border-b">
+                        <td class="p-2"><%= p.name %></td>
+                        <td class="p-2">$<%= p.balance %></td>
+                        <td class="p-2">
+                            <a href="/admin/sync-services" class="text-blue-600">Sync</a>
+                        </td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ===================== -->
+    <!-- PENDING MANUAL ORDERS -->
+    <!-- ===================== -->
+
+    <h3 class="text-xl font-bold mb-4">Fund Requests</h3>
+
+    <table class="w-full text-sm border mb-12">
+        <thead class="bg-gray-100">
+            <tr>
+                <th class="p-2 text-left">User</th>
+                <th class="p-2 text-left">Requested</th>
+                <th class="p-2 text-left">Txn ID</th>
+                <th class="p-2 text-left">Status</th>
+                <th class="p-2 text-left">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% (fundRequests || []).forEach(r => { %>
+                <tr class="border-b">
+                    <td class="p-2"><%= r.username %></td>
+                    <td class="p-2">₹<%= r.requested_amount %></td>
+                    <td class="p-2"><%= r.txn_id %></td>
+                    <td class="p-2"><%= r.status %></td>
+                    <td class="p-2">
+                        <% if(r.status === 'pending') { %>
+                            <form method="POST" action="/admin/funds/approve" class="flex gap-2 items-center">
+                                <input type="hidden" name="id" value="<%= r.id %>">
+                                <input 
+                                    type="number"
+                                    name="approved_amount"
+                                    value="<%= r.requested_amount %>"
+                                    min="10"
+                                    required
+                                    class="border px-2 py-1 w-28"
+                                >
+                                <button 
+                                    type="submit"
+                                    class="bg-green-600 text-white px-3 py-1 rounded"
+                                >
+                                    Approve
+                                </button>
+                            </form>
+                            <form method="POST" action="/admin/funds/reject" class="inline">
+                                <input type="hidden" name="id" value="<%= r.id %>">
+                                <button 
+                                    type="submit"
+                                    class="bg-red-600 text-white px-3 py-1 rounded"
+                                    onclick="return confirm('Are you sure you want to reject this request?')"
+                                >
+                                    Reject
+                                </button>
+                            </form>
+                        <% } %>
+                    </td>
+                </tr>
+            <% }) %>
+        </tbody>
+    </table>
+
+    <h3 class="text-xl font-bold mb-4">Pending Manual Orders</h3>
+
+    <table class="w-full text-sm border">
+        <thead class="bg-gray-100">
+            <tr>
+                <th class="p-2">Order</th>
+                <th class="p-2">User</th>
+                <th class="p-2">Service</th>
+                <th class="p-2">Qty</th>
+                <th class="p-2">Update</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <% (orders||[]).forEach(o => { if(o.status==='Pending Manual'){ %>
+                <tr class="border-b">
+                    <td class="p-2 text-gray-400">#<%= o.id %></td>
+                    <td class="p-2"><%= o.user_id %></td>
+                    <td class="p-2"><%= o.service_name || o.service_id %></td>
+                    <td class="p-2"><%= o.quantity %></td>
+                    <td class="p-2">
+                        <form method="POST" action="/admin/update-order" class="flex gap-2">
+                            <input type="hidden" name="order_id" value="<%= o.id %>">
+                            <input name="provider_order_id" required class="border px-2 py-1">
+                            <select name="status" class="border px-2 py-1">
+                                <option value="Processing">Processing</option>
+                                <option value="Completed">Completed</option>
+                            </select>
+                            <button class="bg-blue-600 text-white px-3 py-1 rounded">
+                                Update
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            <% }}); %>
+        </tbody>
+    </table>
+
+</div>
+
+<!-- ===================== -->
+<!-- CHART SCRIPTS -->
+<!-- ===================== -->
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+const daily = <%- JSON.stringify(dailyOrders || []) %>;
+const statusRows = <%- JSON.stringify(statusRows || []) %>;
+const serviceRevenue = <%- JSON.stringify(serviceRevenue || []) %>;
+
+new Chart(document.getElementById('ordersChart'), {
+    type: 'bar',
+    data: {
+        labels: daily.map(x => x.d),
+        datasets: [{
+            data: daily.map(x => x.c),
+            backgroundColor: '#6366f1'
+        }]
+    }
+});
+
+new Chart(document.getElementById('statusChart'), {
+    type: 'doughnut',
+    data: {
+        labels: statusRows.map(x => x.status),
+        datasets: [{
+            data: statusRows.map(x => x.c),
+            backgroundColor: ['#10b981', '#f59e0b', '#ef4444', '#3b82f6', '#a855f7']
+        }]
+    }
+});
+
+new Chart(document.getElementById('serviceRevenueChart'), {
+    type: 'bar',
+    data: {
+        labels: serviceRevenue.map(x => x.name),
+        datasets: [{
+            data: serviceRevenue.map(x => x.revenue),
+            backgroundColor: '#22c55e'
+        }]
+    }
+});
+
+// auto refresh
+setInterval(()=>location.reload(),60000);
+</script>

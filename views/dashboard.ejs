@@ -1,0 +1,332 @@
+<script src="/js/main.js"></script>
+
+<div class="animate-fade-in-up">
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+    <div class="min-w-0 w-full md:w-auto px-6">
+        <div class="flex items-center gap-3 mb-1 flex-wrap">
+            <h1 class="text-2xl font-bold text-slate-900 break-words">
+                 Welcome back, <%= user.username %>! 👋
+            </h1>
+            <span class="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-50 text-green-700 text-xs font-medium border border-green-200 shrink-0">
+                <i class="fa-solid fa-shield-check"></i> Verified Panel
+            </span>
+        </div>
+        <p class="text-slate-500 text-sm break-words">
+            Track your orders, add funds, and boost your growth instantly.
+        </p>
+    </div>
+
+    <div class="flex items-center gap-3 w-full md:w-auto flex-wrap md:flex-nowrap">
+        <a href="/funds" class="md:hidden flex-1 min-w-[170px] bg-white border border-slate-200 px-4 py-2.5 rounded-xl flex items-center justify-between shadow-sm">
+            <span class="text-xs text-slate-500 font-medium">Balance</span>
+            <span class="font-bold text-slate-800">
+                ₹<%= Number(user.balance || 0).toFixed(2) %>
+            </span>
+        </a>
+        
+        <a href="/order/new"
+           class="flex-1 md:flex-none min-w-[170px] bg-slate-900 hover:bg-slate-800 text-white px-6 py-2.5 rounded-xl font-medium shadow-lg shadow-slate-900/20 transition-all flex items-center justify-center gap-2 group shrink-0">
+            <i class="fa-solid fa-plus group-hover:rotate-90 transition-transform"></i>
+            <span>New Order</span>
+        </a>
+    </div>
+</div>
+
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+    <div class="flex items-center gap-2 text-xs text-slate-500 bg-white/50 p-2 rounded-lg border border-slate-100">
+        <i class="fa-solid fa-lock text-green-500"></i> Secure Payments
+    </div>
+    <div class="flex items-center gap-2 text-xs text-slate-500 bg-white/50 p-2 rounded-lg border border-slate-100">
+        <i class="fa-solid fa-bolt text-yellow-500"></i> Instant Delivery
+    </div>
+    <div class="flex items-center gap-2 text-xs text-slate-500 bg-white/50 p-2 rounded-lg border border-slate-100">
+        <i class="fa-solid fa-headset text-blue-500"></i> 24/7 Support
+    </div>
+    <div class="flex items-center gap-2 text-xs text-slate-500 bg-white/50 p-2 rounded-lg border border-slate-100">
+        <i class="fa-solid fa-star text-purple-500"></i> Best Quality
+    </div>
+</div>
+
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 delay-100 animate-fade-in-up">
+    
+    <a href="/order/new" class="glass-panel p-5 rounded-2xl hover-lift bg-gradient-blue group block">
+        <div class="w-10 h-10 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center mb-3 group-hover:bg-blue-500 group-hover:text-white transition-colors">
+            <i class="fa-solid fa-cart-shopping text-lg"></i>
+        </div>
+        <h3 class="font-bold text-slate-800 text-sm">New Order</h3>
+        <p class="text-xs text-slate-500 mt-1">Boost accounts</p>
+    </a>
+
+    <a href="/funds" class="glass-panel p-5 rounded-2xl hover-lift bg-gradient-green group block">
+        <div class="w-10 h-10 rounded-lg bg-green-100 text-green-600 flex items-center justify-center mb-3 group-hover:bg-green-500 group-hover:text-white transition-colors">
+            <i class="fa-solid fa-wallet text-lg"></i>
+        </div>
+        <h3 class="font-bold text-slate-800 text-sm">Add Funds</h3>
+        <p class="text-xs text-slate-500 mt-1">Via UPI / Card</p>
+    </a>
+
+    <a href="/orders" class="glass-panel p-5 rounded-2xl hover-lift bg-gradient-orange group block">
+        <div class="w-10 h-10 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center mb-3 group-hover:bg-orange-500 group-hover:text-white transition-colors">
+            <i class="fa-solid fa-list-check text-lg"></i>
+        </div>
+        <h3 class="font-bold text-slate-800 text-sm">Order History</h3>
+        <p class="text-xs text-slate-500 mt-1">Track status</p>
+    </a>
+
+   <a href="https://ig.me/m/2928999_._" target="_blank" rel="noopener noreferrer" class="glass-panel p-5 rounded-2xl hover-lift bg-gradient-purple group block">
+
+        <div class="w-10 h-10 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center mb-3 group-hover:bg-purple-500 group-hover:text-white transition-colors">
+            <i class="fa-brands fa-instagram text-xl"></i>
+        </div>
+        <h3 class="font-bold text-slate-800 text-sm">Support</h3>
+        <p class="text-xs text-slate-500 mt-1">Chat with us</p>
+    </a>
+</div>
+
+<div class="bg-amber-50 border border-amber-200 rounded-2xl p-6 mb-8 shadow-sm flex flex-col lg:flex-row items-center gap-6 relative overflow-hidden delay-150 animate-fade-in-up">
+    <div class="absolute -right-6 -top-6 text-amber-100 text-9xl rotate-12 opacity-50 pointer-events-none">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+    </div>
+
+    <div class="flex-1 relative z-10 w-full">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center shrink-0 border border-amber-200 shadow-sm">
+                <i class="fa-solid fa-triangle-exclamation text-lg"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-900 leading-tight">
+                Important Update - Instagram Orders Notice
+            </h3>
+        </div>
+
+        <div class="bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-amber-100 mb-4 shadow-sm">
+            <p class="text-slate-800 text-sm mb-2 font-medium">
+                <span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded text-[10px] font-bold mr-1 align-middle">EN</span>
+                Turn off <span class="font-bold text-red-600">"Flag for review"</span> before ordering Instagram followers.
+            </p>
+            <p class="text-slate-800 text-sm font-medium">
+                <span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded text-[10px] font-bold mr-1 align-middle">HI</span>
+                Instagram Followers order karne se pehle <span class="font-bold text-red-600">“Flag for review”</span> option OFF karna zaroori hai.
+            </p>
+        </div>
+
+        <div class="flex items-start gap-2 text-xs text-red-600 font-medium bg-red-50 p-2.5 rounded-lg border border-red-100">
+            <i class="fa-solid fa-circle-xmark mt-0.5 shrink-0"></i>
+            <p>
+                If Flag for review is ON, order may not start or may fail.
+                <span class="font-bold">No refund in such cases.</span>
+            </p>
+        </div>
+    </div>
+
+    <div class="w-full lg:w-72 shrink-0 relative z-10">
+        <div class="bg-slate-900 rounded-xl overflow-hidden shadow-lg border border-slate-200 relative group aspect-video flex items-center justify-center">
+           <img src="/images/Flag Off.gif"
+     alt="Turn off Flag for Review"
+    class="w-full h-full object-contain opacity-90 group-hover:opacity-100 transition-opacity">
+            <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0">
+
+               <div class="w-10 h-10 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white border border-white/30">
+                   <i class="fa-solid fa-play text-xs ml-0.5"></i>
+               </div>
+            </div>
+        </div>
+        <p class="text-center text-[11px] font-bold text-amber-800/60 mt-2 uppercase tracking-wider">
+            How to turn OFF Flag for Review
+        </p>
+    </div>
+</div>
+
+<div class="mt-8 bg-blue-50 border border-blue-200 rounded-2xl p-5 shadow-sm">
+  <div class="flex items-start gap-4">
+    <div class="flex-shrink-0 text-blue-600 mt-1">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
+        <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd" />
+      </svg>
+    </div>
+
+    <div class="flex-1 pb-8">
+      <h3 class="text-base font-bold text-slate-900 mb-8">Important Instructions (Must Read)</h3>
+      <ul class="list-disc pl-5 space-y-1 text-sm text-slate-700">
+        <li>Read description before adding an order.</li>
+        <li>Do not place a second order on the same link before completion.</li>
+        <li>Wrong or non-working link? No refund.</li>
+        <li>Don't change username if you ordered a refill service.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mt-8 mb-8 delay-200 animate-fade-in-up">
+    
+    <div class="glass-panel p-6 rounded-2xl flex items-center justify-between">
+        <div>
+            <p class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Total Orders</p>
+            <h3 class="text-3xl font-bold text-slate-800"><%= stats.total %></h3>
+        </div>
+        <div class="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center">
+            <i class="fa-solid fa-chart-simple text-slate-400"></i>
+        </div>
+    </div>
+
+    <div class="glass-panel p-6 rounded-2xl flex items-center justify-between">
+        <div>
+            <p class="text-xs font-semibold uppercase tracking-wider text-yellow-600/80 mb-1">Pending</p>
+            <h3 class="text-3xl font-bold text-slate-800"><%= stats.pending || 0 %></h3>
+        </div>
+        <div class="w-12 h-12 rounded-full bg-yellow-50 flex items-center justify-center">
+            <i class="fa-solid fa-clock text-yellow-500"></i>
+        </div>
+    </div>
+
+    <div class="glass-panel p-6 rounded-2xl flex items-center justify-between">
+        <div>
+            <p class="text-xs font-semibold uppercase tracking-wider text-green-600/80 mb-1">Completed</p>
+            <h3 class="text-3xl font-bold text-slate-800"><%= stats.completed || 0 %></h3>
+        </div>
+        <div class="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center">
+            <i class="fa-solid fa-check-circle text-secondary"></i>
+        </div>
+    </div>
+
+    <% 
+        let totalSpend = 0;
+        if(recentOrders && recentOrders.length > 0) {
+           totalSpend = recentOrders.reduce((acc, curr) => acc + Number(curr.charge || 0), 0); 
+        }
+    %>
+    <div class="glass-panel p-6 rounded-2xl flex items-center justify-between">
+        <div>
+            <p class="text-xs font-semibold uppercase tracking-wider text-blue-600/80 mb-1">Total Spent</p>
+            <h3 class="text-3xl font-bold text-primary">
+               ₹<%= Number(totalSpend || 0).toFixed(2) %>+
+            </h3>
+        </div>
+        <div class="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center">
+            <i class="fa-solid fa-coins text-primary"></i>
+        </div>
+    </div>
+</div>
+
+<% if (stats.total == 0) { %>
+<div class="bg-white border border-slate-200 rounded-2xl p-6 mb-8 shadow-sm relative overflow-hidden delay-300 animate-fade-in-up">
+    <div class="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
+    <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+        <i class="fa-regular fa-compass text-primary"></i> Getting Started Guide
+    </h3>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div class="flex items-start gap-3">
+            <div class="w-6 h-6 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-xs font-bold mt-0.5">1</div>
+            <div>
+                <h4 class="font-medium text-sm text-slate-800">Add Funds</h4>
+                <p class="text-xs text-slate-500 mt-1">Deposit money securely via UPI.</p>
+                <a href="/funds" class="text-xs text-primary font-medium hover:underline mt-1 block">Go to Funds &rarr;</a>
+            </div>
+        </div>
+        <div class="flex items-start gap-3">
+            <div class="w-6 h-6 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center text-xs font-bold mt-0.5">2</div>
+            <div>
+                <h4 class="font-medium text-sm text-slate-800">Choose Service</h4>
+                <p class="text-xs text-slate-500 mt-1">Select Instagram, YouTube, etc.</p>
+            </div>
+        </div>
+        <div class="flex items-start gap-3">
+            <div class="w-6 h-6 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center text-xs font-bold mt-0.5">3</div>
+            <div>
+                <h4 class="font-medium text-sm text-slate-800">Place Order</h4>
+                <p class="text-xs text-slate-500 mt-1">Paste link and quantity.</p>
+            </div>
+        </div>
+        <div class="flex items-start gap-3">
+            <div class="w-6 h-6 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center text-xs font-bold mt-0.5">4</div>
+            <div>
+                <h4 class="font-medium text-sm text-slate-800">Track Status</h4>
+                <p class="text-xs text-slate-500 mt-1">Watch your growth live.</p>
+            </div>
+        </div>
+    </div>
+</div>
+<% } %>
+
+<div class="glass-panel rounded-2xl overflow-hidden delay-300 animate-fade-in-up">
+    <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-white">
+        <h3 class="font-bold text-slate-800 text-lg">Recent Orders</h3>
+        <a href="/orders" class="text-sm text-primary font-medium hover:text-blue-700 transition-colors">
+            View All <i class="fa-solid fa-arrow-right ml-1 text-xs"></i>
+        </a>
+    </div>
+
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse mobile-card-table">
+            <thead class="bg-slate-50 text-slate-500 text-xs uppercase font-semibold">
+                <tr>
+                    <th class="p-4 border-b border-slate-200">ID</th>
+                    <th class="p-4 border-b border-slate-200">Service</th>
+                    <th class="p-4 border-b border-slate-200">Link</th>
+                    <th class="p-4 border-b border-slate-200 text-center">Qty</th>
+                    <th class="p-4 border-b border-slate-200">Charge</th>
+                    <th class="p-4 border-b border-slate-200">Status</th>
+                </tr>
+            </thead>
+            <tbody class="text-sm bg-white divide-y divide-slate-100">
+                <% recentOrders.forEach(order => { %>
+                <tr class="hover:bg-slate-50 transition-colors group">
+                    
+                    <td class="p-4 text-slate-500 font-mono text-xs" data-label="Order ID">
+                        #<%= order.id %>
+                    </td>
+                    
+                    <td class="p-4 text-slate-800 font-medium" data-label="Service">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-slate-300"></span>
+                            Service ID: <%= order.service_id %>
+                        </div>
+                    </td>
+                    
+                    <td class="p-4" data-label="Link">
+                        <div class="flex items-center gap-2 max-w-[200px]">
+                            <a href="<%= order.link %>" target="_blank" class="text-blue-500 hover:underline truncate">
+                                <%= order.link %>
+                            </a>
+                            <button onclick="copyToClipboard('<%= order.link %>')" class="text-slate-400 hover:text-slate-600 transition-colors opacity-0 group-hover:opacity-100" title="Copy Link">
+                                <i class="fa-regular fa-copy"></i>
+                            </button>
+                        </div>
+                    </td>
+
+                    <td class="p-4 text-slate-600 font-mono text-center" data-label="Quantity">
+                        <%= order.quantity %>
+                    </td>
+
+                    <td class="p-4 font-bold text-slate-700" data-label="Charge">
+                        <%= user.currency === 'INR' ? '₹' : '$' %><%= Number(order.charge || 0).toFixed(3) %>
+                    </td>
+
+                    <td class="p-4" data-label="Status">
+                        <% 
+                            let badgeClass = 'bg-slate-100 text-slate-600';
+                            if(order.status === 'Completed') badgeClass = 'badge-completed';
+                            if(order.status === 'Processing' || order.status === 'In Progress') badgeClass = 'badge-processing';
+                            if(order.status === 'Canceled') badgeClass = 'badge-canceled';
+                            if(order.status === 'Pending') badgeClass = 'badge-pending';
+                            if(order.status === 'Partial') badgeClass = 'badge-partial';
+                        %>
+                        <span class="badge <%= badgeClass %>">
+                            <%= order.status %>
+                        </span>
+                    </td>
+                </tr>
+                <% }) %>
+                
+                <% if(recentOrders.length === 0) { %>
+                    <tr><td colspan="6" class="p-12 text-center text-slate-400">
+                        <i class="fa-regular fa-folder-open text-4xl mb-3 block opacity-50"></i>
+                        No recent orders found.
+                    </td></tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+</div>

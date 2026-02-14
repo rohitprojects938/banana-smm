@@ -1,0 +1,204 @@
+<div class="min-h-screen bg-[#F8FAFC] py-8 px-4 sm:px-6 lg:px-8 font-sans">
+    <div class="max-w-7xl mx-auto">
+        
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Order Management</h1>
+                <p class="text-slate-500 text-sm">Monitor, track, and manage your service refills.</p>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg>
+                    </span>
+                    <input type="text" id="orderSearch" placeholder="Search ID, Service or Link..." class="pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all w-64 shadow-sm">
+                </div>
+                <select id="statusFilter" class="bg-white border border-slate-200 px-4 py-2 rounded-xl text-sm text-slate-600 focus:ring-2 focus:ring-indigo-500 outline-none shadow-sm cursor-pointer">
+                    <option value="all">All Status</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Processing">Processing</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Canceled">Canceled</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden transition-all hover:shadow-md">
+            <div class="block overflow-x-auto">
+                <table class="w-full text-left border-separate border-spacing-0">
+                    <thead>
+                        <tr class="bg-slate-50/50">
+                            <th class="sticky top-0 p-4 border-b border-slate-100 text-xs font-semibold text-slate-500 uppercase tracking-wider">Order Details</th>
+                            <th class="sticky top-0 p-4 border-b border-slate-100 text-xs font-semibold text-slate-500 uppercase tracking-wider">Service</th>
+                            <th class="sticky top-0 p-4 border-b border-slate-100 text-xs font-semibold text-slate-500 uppercase tracking-wider">Link</th>
+                            <th class="sticky top-0 p-4 border-b border-slate-100 text-xs font-semibold text-slate-500 uppercase tracking-wider">Quantity</th>
+                            <th class="sticky top-0 p-4 border-b border-slate-100 text-xs font-semibold text-slate-500 uppercase tracking-wider">Charge</th>
+                            <th class="sticky top-0 p-4 border-b border-slate-100 text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
+                            <th class="sticky top-0 p-4 border-b border-slate-100 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-50" id="orderTableBody">
+                        <% if (Array.isArray(orders) && orders.length > 0) { %>
+                            <% orders.forEach(order => { %>
+                                <% 
+                                    const displayServiceName = order.service_name ? order.service_name : `Service ID: ${order.service_id}`;
+                                    
+                                    // Safety Date Formatting
+                                    let formattedDate = '-';
+                                    if (order.created_at) {
+                                        const dateObj = new Date(order.created_at);
+                                        if (!isNaN(dateObj)) {
+                                            formattedDate = dateObj.toLocaleString('en-GB', { 
+                                                day: '2-digit', month: 'short', year: 'numeric', 
+                                                hour: '2-digit', minute: '2-digit', hour12: true 
+                                            }).replace(',', '');
+                                        }
+                                    }
+
+                                    // Refill Logic
+                                    const canRefill = order.status === 'Completed' && Number(order.refill_days || 0) > 0 && Number(order.refill_requested || 0) === 0;
+
+                                    // Status Badge Config
+                                    const statusMap = {
+                                        'Completed': { class: 'bg-emerald-50 text-emerald-700 border-emerald-100', icon: 'check-circle' },
+                                        'Processing': { class: 'bg-blue-50 text-blue-700 border-blue-100', icon: 'sync fa-spin' },
+                                        'Pending': { class: 'bg-amber-50 text-amber-700 border-amber-100', icon: 'clock' },
+                                        'Pending Manual': { class: 'bg-amber-50 text-amber-700 border-amber-100', icon: 'hand-paper' },
+                                        'Canceled': { class: 'bg-rose-50 text-rose-700 border-rose-100', icon: 'times-circle' }
+                                    };
+                                    const currentStatus = statusMap[order.status] || { class: 'bg-slate-50 text-slate-600 border-slate-100', icon: 'circle' };
+                                %>
+                                <tr class="order-row group hover:bg-slate-50/80 transition-all duration-200 animate-fadeIn" 
+                                    data-order-id="<%= order.id %>" 
+                                    data-service="<%= displayServiceName %>" 
+                                    data-link="<%= order.link %>" 
+                                    data-status="<%= order.status %>">
+                               <td class="p-4 font-mono text-xs text-slate-400">
+                                        <div class="flex flex-col">
+                                            <span class="text-sm text-slate-900">#<%= order.id %></span>
+                                            <span class="text-[11px] text-slate-400 font-medium"><%= formattedDate %></span>
+                                        </div>
+                                    </td>
+
+                                    <td class="p-4">
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.6)]"></div>
+                                            <span class="text-sm font-medium text-slate-700 truncate max-w-[200px]" title="<%= displayServiceName %>">
+                                                <%= displayServiceName %>
+                                            </span>
+                                        </div>
+                                    </td>
+
+                                    <td class="p-4">
+                                        <a href="<%= order.link %>" target="_blank" class="text-sm text-indigo-600 hover:text-indigo-800 transition-colors truncate max-w-[150px] inline-block font-medium">
+                                            <%= order.link %>
+                                        </a>
+                                    </td>
+
+                                    <td class="p-4">
+                                        <span class="text-sm font-mono text-slate-600"><%= Number(order.quantity || 0).toLocaleString() %></span>
+                                    </td>
+
+                                    <td class="p-4">
+                                        <span class="text-sm font-semibold text-slate-900">₹<%= Number(order.charge || 0).toFixed(2) %></span>
+                                    </td>
+
+                                    <td class="p-4">
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border <%= currentStatus.class %>">
+                                            <i class="fas fa-<%= currentStatus.icon %>"></i>
+                                            <%= order.status %>
+                                        </span>
+                                    </td>
+
+                                    <td class="p-4 text-right">
+                                        <% if (canRefill) { %>
+                                            <button onclick="openRefillModal('<%= order.id %>', '<%= displayServiceName %>', '<%= order.link %>')" 
+                                                    class="text-xs px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white transition-all border border-indigo-100 font-bold">
+                                                Request Refill
+                                            </button>
+                                        <% } else { %>
+                                            <span class="text-slate-300 font-medium">—</span>
+                                        <% } %>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr class="empty-state">
+                                <td colspan="7" class="p-20 text-center">
+                                    <div class="flex flex-col items-center">
+                                        <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4 text-slate-300">
+                                            <i class="fas fa-box-open text-3xl"></i>
+                                        </div>
+                                        <h3 class="text-slate-900 font-semibold">No orders found</h3>
+                                        <p class="text-slate-500 text-sm">Your order history is currently empty.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @keyframes fadeIn { 
+        from { opacity: 0; transform: translateY(4px); } 
+        to { opacity: 1; transform: translateY(0); } 
+    }
+    .animate-fadeIn { animation: fadeIn 0.3s ease-out forwards; }
+    #orderTableBody tr.hidden-row { display: none !important; }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('orderSearch');
+        const statusFilter = document.getElementById('statusFilter');
+        const tableBody = document.getElementById('orderTableBody');
+
+        function performFilter() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            const filterValue = statusFilter.value;
+            const rows = tableBody.querySelectorAll('.order-row');
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+                const orderId = row.getAttribute('data-order-id') || '';
+                const service = row.getAttribute('data-service').toLowerCase() || '';
+                const link = row.getAttribute('data-link').toLowerCase() || '';
+                const status = row.getAttribute('data-status') || '';
+
+                const matchesSearch = orderId.includes(searchTerm) || 
+                                    service.includes(searchTerm) || 
+                                    link.includes(searchTerm);
+                
+                const matchesStatus = (filterValue === 'all' || status === filterValue);
+
+                if (matchesSearch && matchesStatus) {
+                    row.classList.remove('hidden-row');
+                    visibleCount++;
+                } else {
+                    row.classList.add('hidden-row');
+                }
+            });
+
+            // Handle empty search results
+            const existingEmpty = tableBody.querySelector('.no-results-row');
+            if (visibleCount === 0 && rows.length > 0) {
+                if (!existingEmpty) {
+                    const tr = document.createElement('tr');
+                    tr.className = 'no-results-row';
+                    tr.innerHTML = `<td colspan="7" class="p-10 text-center text-slate-400 text-sm">No orders match your filters</td>`;
+                    tableBody.appendChild(tr);
+                }
+            } else if (existingEmpty) {
+                existingEmpty.remove();
+            }
+        }
+
+        searchInput.addEventListener('input', performFilter);
+        statusFilter.addEventListener('change', performFilter);
+    });
+</script>
