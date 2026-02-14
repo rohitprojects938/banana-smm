@@ -1265,16 +1265,6 @@ app.post("/admin/approve-fund", requireAdmin, async (req, res) => {
 });
 
 
-app.get("/change-admin-pass", async (req, res) => {
-  const hash = await bcrypt.hash("Alinna@123", 10); // ← yaha new password likho
-
-  await pool.query(
-    "UPDATE users SET password=? WHERE username='admin'",
-    [hash]
-  );
-
-  res.send("Admin password changed");
-});
 // --- Start Server ---
 const PORT = process.env.PORT || 3000;
 
