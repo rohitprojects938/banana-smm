@@ -43,7 +43,7 @@
         <% if (user) { %>
   <!-- DESKTOP BALANCE -->
   <div class="hidden lg:flex items-center bg-slate-900 text-white text-sm font-bold px-4 py-2 rounded-full">
-    ₹<%= Number(user.balance || 0).toFixed(2) %>
+    &#8377;<%= Number(user.balance || 0).toFixed(2) %>
   </div>
 
   <!-- DESKTOP LOGOUT -->
@@ -133,3 +133,4 @@
     </div>
   </div>
 </nav>
+

@@ -13,14 +13,48 @@ const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const multer = require("multer");
 const fs = require("fs");
+const crypto = require("crypto");
 
 let APP_READY = false;
 
 const app = express();
 
+const nanoid = (size = 7) => {
+  const chars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const bytes = crypto.randomBytes(size);
+  let out = "";
+  for (let i = 0; i < size; i++) {
+    out += chars[bytes[i] % chars.length];
+  }
+  return out;
+};
+
 // --- Configuration ---
-const SESSION_SECRET = process.env.SESSION_SECRET || 'secure-smm-saas-key-2026';
+const SESSION_SECRET = process.env.SESSION_SECRET;
+const IS_PRODUCTION = process.env.NODE_ENV === "production";
+
+if (!SESSION_SECRET) {
+  throw new Error("SESSION_SECRET is required. Set SESSION_SECRET in the environment before starting the server.");
+}
 const BASE_URL = process.env.BASE_URL || "http://localhost:3000";
+
+async function sendTelegramAlert(message) {
+  try {
+    const token = process.env.TELEGRAM_BOT_TOKEN;
+    const chatId = process.env.TELEGRAM_CHAT_ID;
+
+    if (!token || !chatId) {
+      console.warn("Telegram alert skipped: missing TELEGRAM_BOT_TOKEN/TELEGRAM_CHAT_ID");
+      return;
+    }
+
+    const url = `https://api.telegram.org/bot${token}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`;
+    await fetch(url);
+    console.log("Telegram alert sent");
+  } catch (error) {
+    console.error("Telegram error:", error.message);
+  }
+}
 
 // --- MySQL Connection Pool ---
 const pool = mysql.createPool({
@@ -70,6 +104,15 @@ async function initDB() {
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
       )
     `);
+    try {
+      await pool.query("ALTER TABLE users ADD COLUMN referral_code VARCHAR(32) NULL");
+    } catch (e) {}
+    try {
+      await pool.query("ALTER TABLE users ADD COLUMN referred_by VARCHAR(32) NULL");
+    } catch (e) {}
+    try {
+      await pool.query("CREATE UNIQUE INDEX idx_users_referral_code ON users (referral_code)");
+    } catch (e) {}
 
     // Services Table
     await pool.query(`
@@ -85,6 +128,9 @@ async function initDB() {
         status TINYINT(1) DEFAULT 1
       )
     `);
+    try {
+      await pool.query("ALTER TABLE services ADD COLUMN selling_rate DECIMAL(10,2) DEFAULT 0.00");
+    } catch (e) {}
 
     // Providers Table
     await pool.query(`
@@ -104,6 +150,7 @@ async function initDB() {
         id INT AUTO_INCREMENT PRIMARY KEY,
         user_id INT,
         service_id INT,
+        provider_service_id INT DEFAULT 0,
         link TEXT,
         quantity INT,
         charge DECIMAL(10,2),
@@ -114,6 +161,18 @@ async function initDB() {
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
       )
     `);
+    try {
+      await pool.query("ALTER TABLE orders ADD COLUMN provider_service_id INT DEFAULT 0");
+    } catch (e) {}
+    try {
+      await pool.query("ALTER TABLE orders ADD COLUMN refill_days INT DEFAULT 0");
+    } catch (e) {}
+    try {
+      await pool.query("ALTER TABLE orders ADD COLUMN refill_requested TINYINT(1) DEFAULT 0");
+    } catch (e) {}
+    try {
+      await pool.query("ALTER TABLE orders ADD COLUMN claimed_at DATETIME NULL DEFAULT NULL");
+    } catch (e) {}
 
     // Transactions Table
     await pool.query(`
@@ -127,6 +186,69 @@ async function initDB() {
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
       )
     `);
+
+    // Affiliate Visits Table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS affiliate_visits (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        referral_code VARCHAR(32) NOT NULL,
+        ip VARCHAR(64),
+        user_agent TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // Fund Requests Table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS fund_requests (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        requested_amount DECIMAL(10,2) NOT NULL,
+        approved_amount DECIMAL(10,2) DEFAULT NULL,
+        txn_id VARCHAR(255) NOT NULL,
+        method VARCHAR(50) DEFAULT 'UPI',
+        status VARCHAR(50) DEFAULT 'pending',
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    try {
+      await pool.query("CREATE UNIQUE INDEX idx_fund_requests_txn_id ON fund_requests (txn_id)");
+    } catch (e) {}
+    try {
+      await pool.query("ALTER TABLE fund_requests ADD COLUMN requested_amount DECIMAL(10,2) NOT NULL");
+    } catch (e) {}
+    try {
+      await pool.query("ALTER TABLE fund_requests ADD COLUMN approved_amount DECIMAL(10,2) DEFAULT NULL");
+    } catch (e) {}
+    try {
+      await pool.query("ALTER TABLE fund_requests ADD COLUMN txn_id VARCHAR(255) NOT NULL");
+    } catch (e) {}
+    try {
+      await pool.query("ALTER TABLE fund_requests ADD COLUMN method VARCHAR(50) DEFAULT 'UPI'");
+    } catch (e) {}
+    try {
+      await pool.query("ALTER TABLE fund_requests ADD COLUMN status VARCHAR(50) DEFAULT 'pending'");
+    } catch (e) {}
+    try {
+      await pool.query("ALTER TABLE fund_requests ADD COLUMN created_at DATETIME DEFAULT CURRENT_TIMESTAMP");
+    } catch (e) {}
+
+    // Affiliate Earnings Table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS affiliate_earnings (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        referrer_user_id INT NOT NULL,
+        referred_user_id INT NOT NULL,
+        order_id INT NOT NULL,
+        amount DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+        status VARCHAR(20) NOT NULL DEFAULT 'approved',
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY uniq_affiliate_order (order_id)
+      )
+    `);
+    try {
+      await pool.query("ALTER TABLE affiliate_earnings ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'approved'");
+    } catch (e) {}
 
     // Site Settings Table
     await pool.query(`
@@ -175,9 +297,10 @@ async function initDB() {
     if (adminRows.length === 0) {
       const hash = bcrypt.hashSync('admin123', 10);
       const key = Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2);
+      const adminReferralCode = nanoid(7);
       await pool.query(
-        "INSERT INTO users (username, password, is_admin, api_key) VALUES (?, ?, ?, ?)",
-        ['admin', hash, 1, key]
+        "INSERT INTO users (username, password, is_admin, api_key, referral_code, referred_by) VALUES (?, ?, ?, ?, ?, NULL)",
+        ['admin', hash, 1, key, adminReferralCode]
       );
       console.log("Admin account created: admin / admin123");
     }
@@ -188,6 +311,14 @@ async function initDB() {
 }
 
 // --- Multer Storage for Image Uploads ---
+const ALLOWED_UPLOAD_MIME_TYPES = {
+  "image/jpeg": ".jpg",
+  "image/jpg": ".jpg",
+  "image/png": ".png",
+  "image/webp": ".webp"
+};
+const MAX_UPLOAD_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const dir = './public/uploads/landing';
@@ -195,10 +326,21 @@ const storage = multer.diskStorage({
     cb(null, dir);
   },
   filename: (req, file, cb) => {
-    cb(null, 'img-' + Date.now() + path.extname(file.originalname));
+    const safeExt = ALLOWED_UPLOAD_MIME_TYPES[file.mimetype] || ".bin";
+    const randomPart = crypto.randomBytes(16).toString("hex");
+    cb(null, `img-${Date.now()}-${randomPart}${safeExt}`);
   }
 });
-const upload = multer({ storage: storage });
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: MAX_UPLOAD_SIZE_BYTES },
+  fileFilter: (req, file, cb) => {
+    if (!ALLOWED_UPLOAD_MIME_TYPES[file.mimetype]) {
+      return cb(new Error("Invalid file type. Only JPG, JPEG, PNG, WEBP are allowed."));
+    }
+    return cb(null, true);
+  }
+});
 
 // --- Passport Configuration ---
 if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
@@ -224,10 +366,11 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
 
           // Create new user
           const apiKey = Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2);
+          const referralCode = await generateUniqueReferralCode();
           
           const [result] = await pool.query(
-            "INSERT INTO users (google_id, email, username, balance, currency, is_admin, is_developer, api_key) VALUES (?, ?, ?, 0.00, 'INR', 0, 0, ?)",
-            [googleId, email, name, apiKey]
+            "INSERT INTO users (google_id, email, username, balance, currency, is_admin, is_developer, api_key, referral_code, referred_by) VALUES (?, ?, ?, 0.00, 'INR', 0, 0, ?, ?, NULL)",
+            [googleId, email, name, apiKey, referralCode]
           );
 
           const [newUserRows] = await pool.query("SELECT * FROM users WHERE id = ?", [result.insertId]);
@@ -260,18 +403,57 @@ passport.deserializeUser(async (id, done) => {
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static('public'));
+app.use((req, res, next) => {
+  req.cookies = {};
+  const raw = req.headers.cookie;
+  if (raw) {
+    const parts = raw.split("; ");
+    for (const part of parts) {
+      const idx = part.indexOf("=");
+      if (idx > -1) {
+        const key = decodeURIComponent(part.slice(0, idx));
+        const val = decodeURIComponent(part.slice(idx + 1));
+        req.cookies[key] = val;
+      }
+    }
+  }
+  next();
+});
+
+if (IS_PRODUCTION) {
+  app.set("trust proxy", 1);
+}
 
 app.use(session({
   secret: SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 }
+  cookie: {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: IS_PRODUCTION,
+    maxAge: 24 * 60 * 60 * 1000
+  }
 }));
 
 app.use(passport.initialize());
 app.use(passport.session());
+app.use((req, res, next) => {
+  if (!req.user && req.session?.user) req.user = req.session.user;
+  next();
+});
 
 app.set('view engine', 'ejs');
+
+// Force UTF-8 for all server-rendered HTML responses.
+app.use((req, res, next) => {
+  const render = res.render.bind(res);
+  res.render = (view, options, callback) => {
+    res.setHeader("Content-Type", "text/html; charset=UTF-8");
+    return render(view, options, callback);
+  };
+  next();
+});
 
 // --- Global View Variables ---
 app.use((req, res, next) => {
@@ -300,6 +482,18 @@ const requireAdmin = (req, res, next) => {
   next();
 };
 
+async function generateUniqueReferralCode() {
+  for (let i = 0; i < 12; i++) {
+    const code = nanoid(7);
+    const [rows] = await pool.query(
+      "SELECT id FROM users WHERE LOWER(referral_code) = LOWER(?) LIMIT 1",
+      [code]
+    );
+    if (!rows.length) return code;
+  }
+  throw new Error("Unable to generate unique referral code");
+}
+
 // --- CRON JOB ---
 cron.schedule('*/2 * * * *', async () => {
   if (!APP_READY) {
@@ -307,15 +501,17 @@ cron.schedule('*/2 * * * *', async () => {
     return;
   }
 
-  console.log("Cron: Auto processing pending manual orders");
+  console.log("Cron: Auto processing queued pending orders");
 
   try {
     const [orders] = await pool.query(`
-      SELECT o.*, s.provider_service_id, s.provider_id, p.url, p.api_key
+      SELECT o.*, s.provider_service_id, s.provider_id, p.url, p.api_key, p.balance
       FROM orders o
       JOIN services s ON s.id = o.service_id
       JOIN providers p ON p.id = s.provider_id
-      WHERE o.status = 'Pending Manual'
+      WHERE o.status = 'pending'
+        AND o.provider_order_id IS NULL
+        AND o.claimed_at IS NULL
         AND p.status = 1
       LIMIT 20
     `);
@@ -324,7 +520,28 @@ cron.schedule('*/2 * * * *', async () => {
 
     for (const order of orders) {
       try {
+        const [claimResult] = await pool.query(
+          `UPDATE orders
+           SET claimed_at = NOW()
+           WHERE id = ?
+             AND status = 'pending'
+             AND provider_order_id IS NULL
+             AND claimed_at IS NULL`,
+          [order.id]
+        );
+
+        if (!claimResult || claimResult.affectedRows !== 1) {
+          console.log("Skip already claimed/processed order:", order.id);
+          continue;
+        }
+
         console.log("Retrying order:", order.id);
+
+        if (Number(order.balance || 0) < Number(order.charge || 0)) {
+          await pool.query("UPDATE orders SET claimed_at = NULL WHERE id = ?", [order.id]);
+          console.log("Provider balance low, keep queued:", order.id);
+          continue;
+        }
 
         const resp = await axios.post(order.url, {
           key: order.api_key,
@@ -336,22 +553,114 @@ cron.schedule('*/2 * * * *', async () => {
 
         if (resp.data && resp.data.order) {
           await pool.query(
-            "UPDATE orders SET provider_order_id=?, status='Processing' WHERE id=?",
+            "UPDATE orders SET provider_order_id=?, status='processing' WHERE id=?",
             [resp.data.order, order.id]
           );
 
           console.log("SUCCESS placed:", order.id);
         } else {
+          await pool.query("UPDATE orders SET claimed_at = NULL WHERE id = ?", [order.id]);
           console.log("Provider rejected:", order.id, resp.data);
         }
 
       } catch (err) {
+        await pool.query("UPDATE orders SET claimed_at = NULL WHERE id = ?", [order.id]);
         console.log("Retry failed:", order.id, err.response?.data || err.message);
       }
     }
 
   } catch (err) {
     console.log("Cron fatal error:", err.message);
+  }
+});
+
+const normalizeOrderStatus = (raw = "") => {
+  const s = String(raw).trim().toLowerCase();
+
+  if (["completed", "complete", "success"].includes(s)) return "Completed";
+  if (["processing", "in progress", "inprogress", "pending"].includes(s)) return "Processing";
+  if (["partial"].includes(s)) return "Partial";
+  if (["canceled", "cancelled", "failed", "error"].includes(s)) return "Canceled";
+
+  return "Processing";
+};
+
+cron.schedule("*/3 * * * *", async () => {
+  if (!APP_READY) return;
+
+  try {
+    const [orders] = await pool.query(`
+      SELECT o.id, o.user_id, o.charge, o.provider_order_id, o.status,
+             s.provider_id, p.url, p.api_key
+      FROM orders o
+      JOIN services s ON s.id = o.service_id
+      JOIN providers p ON p.id = s.provider_id
+      WHERE LOWER(o.status) IN ('processing', 'queued')
+        AND o.provider_order_id IS NOT NULL
+        AND o.provider_order_id != 0
+        AND p.status = 1
+      LIMIT 100
+    `);
+
+    for (const o of orders) {
+      // Never downgrade a completed order in case of stale read/race.
+      if ((o.status || "").toLowerCase() === "completed") continue;
+
+      try {
+        const resp = await axios.post(o.url, {
+          key: o.api_key,
+          action: "status",
+          order: o.provider_order_id
+        });
+
+        const nextStatus = normalizeOrderStatus(resp?.data?.status);
+
+        const [updateRes] = await pool.query(
+          `UPDATE orders
+           SET status = ?, 
+               start_count = COALESCE(?, start_count),
+               remains = COALESCE(?, remains)
+           WHERE id = ? AND LOWER(status) != 'completed'`,
+          [
+            nextStatus,
+            resp?.data?.start_count ?? null,
+            resp?.data?.remains ?? null,
+            o.id
+          ]
+        );
+
+        if (nextStatus === "Completed" && updateRes.affectedRows > 0) {
+          const [[referredUser]] = await pool.query(
+            "SELECT id, referred_by FROM users WHERE id = ? LIMIT 1",
+            [o.user_id]
+          );
+
+          if (referredUser?.referred_by) {
+            const [refRows] = await pool.query(
+              "SELECT id FROM users WHERE LOWER(referral_code) = LOWER(?) LIMIT 1",
+              [referredUser.referred_by]
+            );
+
+            if (refRows.length && refRows[0].id !== o.user_id) {
+              const commission = Number((Number(o.charge || 0) * 0.10).toFixed(2));
+              if (commission > 0) {
+                await pool.query(
+                  `INSERT INTO affiliate_earnings
+                   (referrer_user_id, referred_user_id, order_id, amount, status)
+                   VALUES (?, ?, ?, ?, 'approved')
+                   ON DUPLICATE KEY UPDATE amount = amount`,
+                  [refRows[0].id, o.user_id, o.id, commission]
+                );
+              }
+            }
+          }
+        }
+      } catch (e) {
+        console.log("Order status sync failed:", o.id, e.response?.data || e.message);
+      }
+    }
+  } catch (e) {
+    console.log("Processing cron error:", e.message);
   }
 });
 
@@ -479,15 +788,66 @@ app.post('/api/admin/landing-config', requireAdmin, async (req, res) => {
 });
 
 // API: Upload Image
-app.post('/api/admin/landing-upload', requireAdmin, upload.single('image'), (req, res) => {
-    if(!req.file) return res.status(400).json({error: 'No file'});
-    res.json({ url: '/uploads/landing/' + req.file.filename });
+app.post('/api/admin/landing-upload', requireAdmin, (req, res) => {
+    upload.single('image')(req, res, (err) => {
+      if (err) {
+        if (err instanceof multer.MulterError && err.code === "LIMIT_FILE_SIZE") {
+          return res.status(400).json({ error: "File too large. Max size is 5MB." });
+        }
+        return res.status(400).json({ error: err.message || "Invalid upload file." });
+      }
+
+      if (!req.file) return res.status(400).json({error: 'No file'});
+      return res.json({ url: '/uploads/landing/' + req.file.filename });
+    });
 });
 
 // Auth Page
 app.get('/auth', (req, res) => {
   if (req.session.userId) return res.redirect('/dashboard');
   res.render('layout', { body: 'auth', pageTitle: 'Login / Signup' });
+});
+
+app.get('/login', (req, res) => {
+  res.redirect('/auth');
+});
+
+app.get('/signup', (req, res) => {
+  if (req.session.userId) return res.redirect('/dashboard');
+  res.redirect('/auth');
+});
+
+app.get("/ref/:code", async (req, res) => {
+  const code = String(req.params.code || "").trim().toLowerCase();
+  if (!code) return res.redirect("/signup");
+
+  try {
+    const [users] = await pool.query(
+      "SELECT id, referral_code FROM users WHERE LOWER(referral_code) = LOWER(?) LIMIT 1",
+      [code]
+    );
+
+    if (!users.length) return res.redirect("/signup");
+
+    const canonicalCode = users[0].referral_code;
+
+    await pool.query(
+      "INSERT INTO affiliate_visits (referral_code, ip, user_agent) VALUES (?, ?, ?)",
+      [canonicalCode, req.ip, req.headers["user-agent"] || ""]
+    );
+
+    res.cookie("ref", canonicalCode, {
+      maxAge: 1000 * 60 * 60 * 24 * 30,
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production"
+    });
+
+    return res.redirect("/signup");
+  } catch (err) {
+    console.error("REF ROUTE ERROR:", err.message);
+    return res.redirect("/signup");
+  }
 });
 
 // Google Auth
@@ -521,15 +881,33 @@ app.post('/auth/signup', async (req, res) => {
   try {
     const hash = await bcrypt.hash(password, 10);
     const apiKey = Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2);
+    const referralCode = await generateUniqueReferralCode();
+    const refCode = String(req.cookies?.ref || "").trim().toLowerCase();
+
+    let referredBy = null;
+    if (refCode) {
+      const [refRows] = await pool.query(
+        "SELECT id, referral_code FROM users WHERE LOWER(referral_code) = LOWER(?) LIMIT 1",
+        [refCode]
+      );
+      if (refRows.length) {
+        referredBy = refRows[0].referral_code;
+      }
+    }
+
+    if (referredBy && referredBy.toLowerCase() === referralCode.toLowerCase()) {
+      referredBy = null;
+    }
 
     const [result] = await pool.query(
-      "INSERT INTO users (username, password, api_key) VALUES (?, ?, ?)", 
-      [username, hash, apiKey]
+      "INSERT INTO users (username, password, api_key, referral_code, referred_by) VALUES (?, ?, ?, ?, ?)", 
+      [username, hash, apiKey, referralCode, referredBy]
     );
 
     req.session.userId = result.insertId;
-    req.session.user = { id: result.insertId, username, is_admin: 0, balance: 0 };
+    req.session.user = { id: result.insertId, username, is_admin: 0, balance: 0, referral_code: referralCode };
     req.session.isAdmin = 0;
+    res.clearCookie("ref");
 
     res.redirect('/dashboard');
   } catch (err) {
@@ -580,13 +958,18 @@ app.get('/dashboard', requireAuth, async (req, res) => {
     const userId = req.session.userId;
 
     const [[user]] = await pool.query(
-      "SELECT balance FROM users WHERE id = ?",
+      "SELECT balance, referral_code FROM users WHERE id = ?",
       [userId]
     );
     req.session.user.balance = user.balance;
 
     const [statsRows] = await pool.query(
-      "SELECT count(*) as total, sum(case when status='Pending' then 1 else 0 end) as pending, sum(case when status='Completed' then 1 else 0 end) as completed FROM orders WHERE user_id = ?",
+      `SELECT 
+        COUNT(*) as total,
+        SUM(CASE WHEN LOWER(status) = 'pending' THEN 1 ELSE 0 END) as pending,
+        SUM(CASE WHEN LOWER(status) = 'completed' THEN 1 ELSE 0 END) as completed
+       FROM orders
+       WHERE user_id = ?`,
       [userId]
     );
     let stats = statsRows[0];
@@ -597,11 +980,42 @@ app.get('/dashboard', requireAuth, async (req, res) => {
       [userId]
     );
 
+    const referralCode = user?.referral_code || "";
+    const affiliate = {
+      referralCode,
+      referralLink: referralCode ? `${BASE_URL}/ref/${referralCode}` : "",
+      visits: 0,
+      referrals: 0,
+      totalEarnings: 0,
+      availableEarnings: 0
+    };
+
+    if (referralCode) {
+      const [[visitRow]] = await pool.query(
+        "SELECT COUNT(*) AS c FROM affiliate_visits WHERE LOWER(referral_code) = LOWER(?)",
+        [referralCode]
+      );
+      const [[refRow]] = await pool.query(
+        "SELECT COUNT(*) AS c FROM users WHERE LOWER(referred_by) = LOWER(?)",
+        [referralCode]
+      );
+      const [[earningRow]] = await pool.query(
+        "SELECT COALESCE(SUM(amount), 0) AS s FROM affiliate_earnings WHERE referrer_user_id = ?",
+        [userId]
+      );
+
+      affiliate.visits = Number(visitRow?.c || 0);
+      affiliate.referrals = Number(refRow?.c || 0);
+      affiliate.totalEarnings = Number(earningRow?.s || 0);
+      affiliate.availableEarnings = affiliate.totalEarnings;
+    }
+
     res.render('layout', {
       body: 'dashboard',
       pageTitle: 'Dashboard',
       stats,
-      recentOrders: recentOrders || []
+      recentOrders: recentOrders || [],
+      affiliate
     });
   } catch (err) {
     console.error(err);
@@ -617,6 +1031,68 @@ app.get('/order/new', requireAuth, async (req, res) => {
   } catch (err) {
     console.error(err);
     res.render('layout', { body: 'order_new', pageTitle: 'New Order', services: [] });
+  }
+});
+
+// Affiliate Dashboard Route
+app.get("/affiliate", async (req, res) => {
+  if (!req.user) return res.redirect("/login");
+
+  try {
+    const userId = req.user.id;
+    let referralCode = req.user.referral_code;
+
+    if (!referralCode) {
+      referralCode = await generateUniqueReferralCode();
+      await pool.query("UPDATE users SET referral_code = ? WHERE id = ?", [referralCode, userId]);
+      if (req.session?.user) req.session.user.referral_code = referralCode;
+      if (req.user) req.user.referral_code = referralCode;
+    }
+
+    // Visits
+    const [[visits]] = await pool.query(
+      "SELECT COUNT(*) AS total FROM affiliate_visits WHERE referral_code = ?",
+      [referralCode]
+    );
+
+    // Registrations
+    const [[registrations]] = await pool.query(
+      "SELECT COUNT(*) AS total FROM users WHERE referred_by = ?",
+      [referralCode]
+    );
+
+    // Earnings
+    const [[earnings]] = await pool.query(
+      `SELECT 
+        COALESCE(SUM(amount),0) AS total,
+        COALESCE(SUM(CASE WHEN status='approved' THEN amount ELSE 0 END),0) AS approved,
+        COALESCE(SUM(CASE WHEN status='pending' THEN amount ELSE 0 END),0) AS pending
+      FROM affiliate_earnings
+      WHERE referrer_user_id = ?`,
+      [userId]
+    );
+
+    const conversion =
+      Number(visits.total) > 0
+        ? ((Number(registrations.total) / Number(visits.total)) * 100).toFixed(2)
+        : "0.00";
+
+    res.render("layout", {
+      body: "affiliate",
+      pageTitle: "Affiliate Dashboard",
+      affiliate: {
+        refLink: `https://bananasmm.onrender.com/ref/${referralCode}`,
+        visits: Number(visits.total || 0),
+        registrations: Number(registrations.total || 0),
+        conversion,
+        totalEarnings: Number(earnings.total || 0),
+        approvedEarnings: Number(earnings.approved || 0),
+        pendingEarnings: Number(earnings.pending || 0)
+      }
+    });
+  } catch (err) {
+    console.error("AFFILIATE DASHBOARD ERROR:", err.message);
+    return res.redirect("/dashboard");
   }
 });
 
@@ -636,105 +1112,154 @@ app.post("/api/place-order", requireAuth, async (req, res) => {
       [service_id]
     );
 
-    // ❌ block if quantity less than provider min
+    if (!service) {
+      return res.status(400).json({ error: "Invalid service" });
+    }
+
+    if (!link) {
+      return res.status(400).json({ error: "Invalid link" });
+    }
+    try {
+      const parsed = new URL(link);
+      if (!["http:", "https:"].includes(parsed.protocol)) {
+        return res.status(400).json({ error: "Invalid link" });
+      }
+    } catch (e) {
+      return res.status(400).json({ error: "Invalid link" });
+    }
+
+    // âŒ block if quantity less than provider min
 if (service.min && Number(quantity) < Number(service.min)) {
   return res.status(400).json({
     error: `Minimum quantity for this service is ${service.min}`
   });
 }
 
-// ❌ block if quantity more than provider max
+// âŒ block if quantity more than provider max
 if (service.max && Number(quantity) > Number(service.max)) {
   return res.status(400).json({
     error: `Maximum quantity for this service is ${service.max}`
   });
 }
 
-
-    if (!service) {
-      return res.status(400).json({ error: "Invalid service" });
-    }
-
     // 2. Calculate charge using selling_rate
     charge = (Number(service.selling_rate) / 1000) * Number(quantity);
 
-    // 3. Get user
-    const [[user]] = await pool.query(
-      "SELECT * FROM users WHERE id = ?",
-      [userId]
-    );
-
-    if (Number(user.balance) < charge) {
-      return res.status(400).json({ error: "Insufficient balance" });
-    }
-
-    // 4. Deduct balance
-    await pool.query(
-      "UPDATE users SET balance = balance - ? WHERE id = ?",
-      [charge, userId]
-    );
-
-    // 5. Create order in DB as Queued
-   // 5. Create order in DB as Queued
-const [orderResult] = await pool.query(
-  `INSERT INTO orders 
-   (user_id, service_id, provider_service_id, link, quantity, charge, status) 
-   VALUES (?, ?, ?, ?, ?, ?, 'Queued')`,
-  [
-    userId,
-    service_id,
-    service.provider_service_id,
-    link,
-    quantity,
-    charge
-  ]
-);
-
-
-    orderId = orderResult.insertId;
-
-    // 6. Try placing order to provider
     const [[provider]] = await pool.query(
       "SELECT * FROM providers WHERE id = ?",
       [service.provider_id]
     );
-
-    const apiRes = await axios.post(provider.url, {
-      key: provider.api_key,
-      action: "add",
-      service: service.provider_service_id,
-      link,
-      quantity
-    });
-
-    if (!apiRes.data || !apiRes.data.order) {
-      throw new Error("Provider order failed");
+    if (!provider) {
+      return res.status(500).json({
+        success: false,
+        message: "Internal server error"
+      });
     }
 
-    // 7. Provider success -> update status
-    await pool.query(
-      "UPDATE orders SET provider_order_id = ?, status = 'Processing' WHERE id = ?",
-      [apiRes.data.order, orderId]
-    );
+    let connection;
+    let txStarted = false;
+    try {
+      connection = await pool.getConnection();
+      await connection.beginTransaction();
+      txStarted = true;
 
-    return res.json({ success: true, order_id: orderId });
+      // 3. Lock user row and re-check balance inside transaction
+      const [[user]] = await connection.query(
+        "SELECT * FROM users WHERE id = ? FOR UPDATE",
+        [userId]
+      );
+
+      if (!user || Number(user.balance) < charge) {
+        await connection.rollback();
+        txStarted = false;
+        return res.status(400).json({ error: "Insufficient balance" });
+      }
+
+      // 4. Deduct balance
+      await connection.query(
+        "UPDATE users SET balance = balance - ? WHERE id = ?",
+        [charge, userId]
+      );
+
+      // 5. Create order in DB as pending
+      const [orderResult] = await connection.query(
+        `INSERT INTO orders 
+         (user_id, service_id, provider_service_id, link, quantity, charge, status, provider_order_id) 
+         VALUES (?, ?, ?, ?, ?, ?, 'pending', NULL)`,
+        [
+          userId,
+          service_id,
+          service.provider_service_id,
+          link,
+          quantity,
+          charge
+        ]
+      );
+
+      await connection.commit();
+      txStarted = false;
+      orderId = orderResult.insertId;
+    } catch (txErr) {
+      if (connection && txStarted) {
+        try {
+          await connection.rollback();
+        } catch (_) {}
+      }
+      console.error("PLACE ORDER TX ERROR:", txErr.response?.data || txErr.message);
+      return res.status(500).json({
+        success: false,
+        message: "Internal server error"
+      });
+    } finally {
+      if (connection) connection.release();
+    }
+
+    if (Number(provider.balance || 0) < Number(charge || 0)) {
+      return res.json({
+        success: true,
+        message: "Order placed successfully and queued for processing",
+        order_id: orderId
+      });
+    }
+
+    try {
+      const apiRes = await axios.post(provider.url, {
+        key: provider.api_key,
+        action: "add",
+        service: service.provider_service_id,
+        link,
+        quantity
+      });
+
+      if (!apiRes.data || !apiRes.data.order) {
+        throw new Error("Provider order failed");
+      }
+
+      // 6. Provider success -> update status
+      await pool.query(
+        "UPDATE orders SET provider_order_id = ?, status = 'processing' WHERE id = ?",
+        [apiRes.data.order, orderId]
+      );
+
+      return res.json({
+        success: true,
+        message: "Order placed successfully",
+        order_id: orderId
+      });
+    } catch (err) {
+      console.error("Provider order failed:", err.response?.data || err.message);
+      return res.json({
+        success: true,
+        message: "Order queued and will be processed shortly",
+        order_id: orderId
+      });
+    }
 
   } catch (err) {
     console.error("PLACE ORDER ERROR:", err.response?.data || err.message);
-
-    // If provider failed, keep order saved and mark manual
-    if (orderId) {
-      await pool.query(
-        "UPDATE orders SET status = 'Pending Manual' WHERE id = ?",
-        [orderId]
-      );
-    }
-
-    // Always show success to user
-    return res.json({
-      success: true,
-      order_id: orderId,
-      message: "Order received successfully. It will be processed shortly."
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error"
     });
   }
 });
@@ -753,68 +1278,63 @@ app.get('/orders', requireAuth, async (req, res) => {
 // Funds
 app.get('/funds', requireAuth, async (req, res) => {
   try {
-    const [txs] = await pool.query("SELECT * FROM transactions WHERE user_id = ? ORDER BY id DESC", [req.session.userId]);
-    res.render('layout', { body: 'funds', pageTitle: 'Add Funds', transactions: txs || [] });
+    const [fundHistory] = await pool.query(
+      `SELECT 
+         id,
+         requested_amount AS amount,
+         method AS payment_method,
+         txn_id,
+         status,
+         created_at
+       FROM fund_requests
+       WHERE user_id = ?
+       ORDER BY created_at DESC`,
+      [req.session.userId]
+    );
+    res.render('layout', {
+      body: 'funds',
+      pageTitle: 'Add Funds',
+      fundHistory: fundHistory || []
+    });
   } catch (err) {
-    res.render('layout', { body: 'funds', pageTitle: 'Add Funds', transactions: [] });
+    res.render('layout', { body: 'funds', pageTitle: 'Add Funds', fundHistory: [] });
   }
 });
 
-// API: Fund Request
+// API: Fund Request (SECURE - DUPLICATE SAFE)
 app.post("/api/fund-request", requireAuth, async (req, res) => {
-  const { amount, txn_id } = req.body;
+  let { amount, txn_id } = req.body;
   const userId = req.session.userId;
+
+  txn_id = txn_id ? txn_id.trim().toUpperCase() : "";
 
   if (!amount || Number(amount) < 10) {
-    return res.status(400).json({
+    return res.json({
       success: false,
-      message: "Minimum fund amount is ₹10"
+      error: "Minimum fund amount is Rs.10"
     });
   }
 
-  if (!txn_id) {
-    return res.status(400).json({
+  if (!txn_id || txn_id.length < 6) {
+    return res.json({
       success: false,
-      message: "Transaction ID required"
+      error: "Invalid Transaction ID"
     });
   }
 
   try {
-    await pool.query(
-      `INSERT INTO fund_requests 
-       (user_id, requested_amount, txn_id, status) 
-       VALUES (?, ?, ?, 'pending')`,
-      [userId, amount, txn_id]
-    );
-
-    res.json({ success: true });
-  } catch (err) {
-    console.error("FUND REQUEST ERROR:", err.message);
-    res.status(500).json({ error: "Server error" });
-  }
-});
-
-// API: UPI Submit
-app.post("/api/funds/upi-submit", requireAuth, async (req, res) => {
-  const userId = req.session.userId;
-  const { amount, txn_id } = req.body;
-
-  if (!amount || amount < 1 || !txn_id) {
-    return res.status(400).json({ error: "Invalid data" });
-  }
-
-  try {
-    // Prevent duplicate txn id
     const [exists] = await pool.query(
-      "SELECT id FROM fund_requests WHERE txn_id = ?",
+      "SELECT id FROM fund_requests WHERE txn_id = ? LIMIT 1",
       [txn_id]
     );
 
-    if (exists.length) {
-      return res.status(400).json({ error: "Transaction ID already used" });
+    if (exists.length > 0) {
+      return res.json({
+        success: false,
+        error: "Transaction already submitted"
+      });
     }
 
-    // Insert fund request
     await pool.query(
       `INSERT INTO fund_requests 
        (user_id, requested_amount, txn_id, method, status)
@@ -822,14 +1342,38 @@ app.post("/api/funds/upi-submit", requireAuth, async (req, res) => {
       [userId, amount, txn_id]
     );
 
-    return res.json({
-      success: true,
-      message: "Payment submitted. Awaiting verification."
-    });
+    const [userRows] = await pool.query(
+      "SELECT username FROM users WHERE id = ? LIMIT 1",
+      [userId]
+    );
+    const username = userRows[0]?.username || `User#${userId}`;
+    const safeAmount = Number(amount || 0).toFixed(2);
+    const message = `
+🔔 New Fund Request
 
+User: ${username}
+Amount: ₹${safeAmount}
+
+Check Banana SMM Admin Panel
+`;
+
+    await sendTelegramAlert(message);
+
+    return res.json({ success: true });
   } catch (err) {
-    console.error("UPI submit error:", err);
-    return res.status(500).json({ error: "Server error" });
+    console.error("FUND REQUEST ERROR:", err.message);
+
+    if (err.code === "ER_DUP_ENTRY") {
+      return res.json({
+        success: false,
+        error: "Transaction already submitted"
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      error: "Server error. Try again."
+    });
   }
 });
 
@@ -867,7 +1411,7 @@ app.get('/admin', requireAdmin, async (req, res) => {
       SELECT SUM(charge) as s
       FROM orders
       WHERE DATE(created_at) = CURDATE()
-        AND status IN ('Processing','Completed')
+        AND LOWER(status) IN ('processing','completed')
     `);
 
     // -------- Status Distribution --------
@@ -903,7 +1447,7 @@ app.get('/admin', requireAdmin, async (req, res) => {
         SUM((s.rate/1000)*o.quantity) as provider_cost
       FROM orders o
       JOIN services s ON s.id = o.service_id
-      WHERE o.status IN ('Processing','Completed')
+      WHERE LOWER(o.status) IN ('processing','completed')
     `);
 
     const totalRevenue = Number(profitRow?.revenue || 0);
@@ -1019,7 +1563,58 @@ app.get('/admin', requireAdmin, async (req, res) => {
   }
 });
 
-app.get("/admin/test-services", async (req, res) => {
+app.get('/admin/user/:id', requireAdmin, async (req, res) => {
+  const userId = req.params.id;
+
+  try {
+    const [userRows] = await pool.query(
+      "SELECT id, username, email, balance, created_at FROM users WHERE id = ? LIMIT 1",
+      [userId]
+    );
+
+    if (!userRows.length) {
+      return res.status(404).render('layout', {
+        body: 'admin-user-detail',
+        pageTitle: 'User Detail',
+        inspectedUser: null,
+        orders: [],
+        error: 'User not found'
+      });
+    }
+
+    const [orders] = await pool.query(
+      `SELECT o.id,
+              COALESCE(s.name, CONCAT('Service #', o.service_id)) AS service_name,
+              o.quantity,
+              o.status,
+              o.created_at
+       FROM orders o
+       LEFT JOIN services s ON s.id = o.service_id
+       WHERE o.user_id = ?
+       ORDER BY o.id DESC`,
+      [userId]
+    );
+
+    return res.render('layout', {
+      body: 'admin-user-detail',
+      pageTitle: `User ${userRows[0].username}`,
+      inspectedUser: userRows[0],
+      orders,
+      error: null
+    });
+  } catch (err) {
+    console.error("ADMIN USER DETAIL ERROR:", err.message);
+    return res.status(500).render('layout', {
+      body: 'admin-user-detail',
+      pageTitle: 'User Detail',
+      inspectedUser: null,
+      orders: [],
+      error: 'Server error'
+    });
+  }
+});
+
+app.get("/admin/test-services", requireAdmin, async (req, res) => {
   try {
     const [rows] = await pool.query(
       "SELECT * FROM providers WHERE status = 1 LIMIT 1"
@@ -1043,7 +1638,7 @@ app.get("/admin/test-services", async (req, res) => {
   }
 });
 
-app.get("/test-db", async (req, res) => {
+app.get("/test-db", requireAdmin, async (req, res) => {
   try {
     await pool.query("SELECT 1");
     res.send("DB working");
@@ -1154,17 +1749,17 @@ app.post("/admin/funds/approve", requireAdmin, async (req, res) => {
       [approved_amount, reqData.user_id]
     );
 
-    // 1️⃣ Add balance to user (session sync)
+    // 1ï¸âƒ£ Add balance to user (session sync)
     const approvedAmount = approved_amount;
     const userId = reqData.user_id;
 
-    // 2️⃣ Refresh session balance immediately
+    // 2ï¸âƒ£ Refresh session balance immediately
     const [[updatedUser]] = await pool.query(
       "SELECT balance FROM users WHERE id = ?",
       [userId]
     );
 
-    // 3️⃣ Update session (only if same user is in session)
+    // 3ï¸âƒ£ Update session (only if same user is in session)
     if (req.session.user && req.session.user.id === userId) {
       req.session.user.balance = updatedUser.balance;
     }
@@ -1220,7 +1815,7 @@ app.post("/admin/approve-fund", requireAdmin, async (req, res) => {
 
     if (!reqData) return res.redirect("/admin");
 
-    // 1️⃣ Update fund request
+    // 1ï¸âƒ£ Update fund request
     await pool.query(
       `UPDATE fund_requests 
        SET approved_amount=?, status='approved' 
@@ -1228,28 +1823,28 @@ app.post("/admin/approve-fund", requireAdmin, async (req, res) => {
       [approved_amount, request_id]
     );
 
-    // 2️⃣ Credit user balance
+    // 2ï¸âƒ£ Credit user balance
     await pool.query(
       "UPDATE users SET balance = balance + ? WHERE id=?",
       [approved_amount, reqData.user_id]
     );
 
-    // 1️⃣ Add balance to user (session sync)
+    // 1ï¸âƒ£ Add balance to user (session sync)
     const approvedAmount = approved_amount;
     const userId = reqData.user_id;
 
-    // 2️⃣ Refresh session balance immediately
+    // 2ï¸âƒ£ Refresh session balance immediately
     const [[updatedUser]] = await pool.query(
       "SELECT balance FROM users WHERE id = ?",
       [userId]
     );
 
-    // 3️⃣ Update session (only if same user is in session)
+    // 3ï¸âƒ£ Update session (only if same user is in session)
     if (req.session.user && req.session.user.id === userId) {
       req.session.user.balance = updatedUser.balance;
     }
 
-    // 3️⃣ Insert transaction log
+    // 3ï¸âƒ£ Insert transaction log
     await pool.query(
       `INSERT INTO transactions 
        (user_id, amount, type, txn_id, status) 
@@ -1271,5 +1866,7 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, "0.0.0.0", () => {
   console.log("Server running on port " + PORT);
 });
+
+
 
 

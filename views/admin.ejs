@@ -1,4 +1,4 @@
-<div class="container py-12">
+<div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
 
     <!-- HEADER -->
     <div class="flex justify-between items-center mb-8">
@@ -10,7 +10,7 @@
     <!-- TOP ANALYTICS CARDS -->
     <!-- ===================== -->
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6">
 
         <div class="bg-white rounded-2xl shadow p-6">
             <p class="text-sm text-gray-500">Today Orders</p>
@@ -20,7 +20,7 @@
         <div class="bg-white rounded-2xl shadow p-6">
             <p class="text-sm text-gray-500">Today Revenue</p>
             <p class="text-3xl font-bold text-green-600">
-                ₹<%= Number(todayRevenue||0).toFixed(2) %>
+                &#8377;<%= Number(todayRevenue||0).toFixed(2) %>
             </p>
         </div>
 
@@ -42,21 +42,21 @@
         <div class="bg-white rounded-2xl shadow p-6">
             <p class="text-sm text-gray-500">Total Revenue</p>
             <p class="text-xl font-bold text-blue-600">
-                ₹<%= Number(totalRevenue||0).toFixed(2) %>
+                &#8377;<%= Number(totalRevenue||0).toFixed(2) %>
             </p>
         </div>
 
         <div class="bg-white rounded-2xl shadow p-6">
             <p class="text-sm text-gray-500">Provider Cost</p>
             <p class="text-xl font-bold text-orange-600">
-                ₹<%= Number(providerCost||0).toFixed(2) %>
+                &#8377;<%= Number(providerCost||0).toFixed(2) %>
             </p>
         </div>
 
         <div class="bg-white rounded-2xl shadow p-6">
             <p class="text-sm text-gray-500">Net Profit</p>
             <p class="text-xl font-bold text-green-700">
-                ₹<%= Number(totalProfit||0).toFixed(2) %>
+                &#8377;<%= Number(totalProfit||0).toFixed(2) %>
             </p>
         </div>
 
@@ -106,16 +106,16 @@
         <table class="w-full text-sm">
             <thead>
                 <tr class="text-gray-500">
-                    <th class="p-2 text-left">User</th>
-                    <th class="p-2 text-left">Spend</th>
+                    <th class="px-2 py-1 sm:p-2 text-left">User</th>
+                    <th class="px-2 py-1 sm:p-2 text-left">Spend</th>
                 </tr>
             </thead>
             <tbody>
                 <% (topUsers || []).forEach(u => { %>
                     <tr class="border-b">
-                        <td class="p-2"><%= u.username %></td>
-                        <td class="p-2 font-bold">
-                            ₹<%= Number(u.spend).toFixed(2) %>
+                        <td class="px-2 py-1 sm:p-2"><%= u.username %></td>
+                        <td class="px-2 py-1 sm:p-2 font-bold">
+                            &#8377;<%= Number(u.spend).toFixed(2) %>
                         </td>
                     </tr>
                 <% }) %>
@@ -124,130 +124,266 @@
     </div>
 
     <!-- ===================== -->
-    <!-- PROVIDERS -->
+    <!-- FUND REQUESTS -->
     <!-- ===================== -->
 
-    <div class="card mb-10">
-        <h3 class="text-xl font-bold mb-4">Providers</h3>
+    <div class="bg-white rounded-2xl shadow mb-12">
+        <button 
+            onclick="toggleSection('fundSection')" 
+            class="w-full flex justify-between items-center px-4 py-4 sm:p-6 text-left font-bold text-lg"
+        >
+            <span>Fund Requests</span>
+            <span id="fundSectionIcon">▲</span>
+        </button>
 
-        <table class="w-full text-sm">
-            <thead class="bg-gray-100">
-                <tr>
-                    <th class="p-2">Name</th>
-                    <th class="p-2">Balance</th>
-                    <th class="p-2">Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                <% (providers||[]).forEach(p => { %>
-                    <tr class="border-b">
-                        <td class="p-2"><%= p.name %></td>
-                        <td class="p-2">$<%= p.balance %></td>
-                        <td class="p-2">
-                            <a href="/admin/sync-services" class="text-blue-600">Sync</a>
-                        </td>
+        <div id="fundSection" class="px-6 pb-6">
+            <div class="overflow-x-auto sm:overflow-visible">
+            <table class="w-full text-xs sm:text-sm border">
+                <thead class="bg-gray-100">
+                    <tr>
+                        <th class="px-2 py-1 sm:p-2 text-xs sm:text-sm text-left">User</th>
+                        <th class="px-2 py-1 sm:p-2 text-xs sm:text-sm text-left">Requested</th>
+                        <th class="px-2 py-1 sm:p-2 text-xs sm:text-sm text-left">Txn ID</th>
+                        <th class="px-2 py-1 sm:p-2 text-xs sm:text-sm text-left">Status</th>
+                        <th class="px-2 py-1 sm:p-2 text-xs sm:text-sm text-left">Action</th>
                     </tr>
-                <% }) %>
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    <% (fundRequests || []).forEach(r => { %>
+                        <tr class="border-b">
+                            <td class="px-2 py-1 sm:p-2 text-xs sm:text-sm"><%= r.username %></td>
+                            <td class="px-2 py-1 sm:p-2 text-xs sm:text-sm">&#8377;<%= r.requested_amount %></td>
+                            <td class="px-2 py-1 sm:p-2 text-xs sm:text-sm"><%= r.txn_id %></td>
+                            <td class="px-2 py-1 sm:p-2 text-xs sm:text-sm">
+                                <span class="
+                                    <% if(r.status==='approved'){ %> text-green-600
+                                    <% } else if(r.status==='rejected'){ %> text-red-600
+                                    <% } else { %> text-yellow-600 <% } %>
+                                    font-semibold
+                                ">
+                                    <%= r.status %>
+                                </span>
+                            </td>
+                            <td class="px-2 py-1 sm:p-2 text-xs sm:text-sm">
+                                <% if(r.status === 'pending') { %>
+
+                                    <!-- MOBILE VERSION -->
+                                    <div class="flex flex-col space-y-2 sm:hidden">
+
+                                        <form method="POST" action="/admin/funds/approve" class="flex flex-col space-y-2">
+                                            <input type="hidden" name="id" value="<%= r.id %>">
+
+                                            <input 
+                                                type="number"
+                                                name="approved_amount"
+                                                value="<%= r.requested_amount %>"
+                                                min="10"
+                                                required
+                                                class="border px-2 py-1 w-full rounded text-sm"
+                                            >
+
+                                            <button 
+                                                type="submit"
+                                                class="bg-green-600 text-white py-2 rounded w-full text-sm"
+                                            >
+                                                Approve
+                                            </button>
+                                        </form>
+
+                                        <form method="POST" action="/admin/funds/reject">
+                                            <input type="hidden" name="id" value="<%= r.id %>">
+                                            <button 
+                                                type="submit"
+                                                class="bg-red-600 text-white py-2 rounded w-full text-sm"
+                                                onclick="return confirm('Are you sure you want to reject this request?')"
+                                            >
+                                                Reject
+                                            </button>
+                                        </form>
+
+                                    </div>
+
+                                    <!-- DESKTOP VERSION -->
+                                    <div class="hidden sm:flex items-center gap-2">
+
+                                        <form method="POST" action="/admin/funds/approve" class="flex items-center gap-2">
+                                            <input type="hidden" name="id" value="<%= r.id %>">
+
+                                            <input 
+                                                type="number"
+                                                name="approved_amount"
+                                                value="<%= r.requested_amount %>"
+                                                min="10"
+                                                required
+                                                class="border px-2 py-1 w-24 rounded text-sm"
+                                            >
+
+                                            <button 
+                                                type="submit"
+                                                class="bg-green-600 text-white px-3 py-1 rounded text-sm"
+                                            >
+                                                Approve
+                                            </button>
+                                        </form>
+
+                                        <form method="POST" action="/admin/funds/reject">
+                                            <input type="hidden" name="id" value="<%= r.id %>">
+                                            <button 
+                                                type="submit"
+                                                class="bg-red-600 text-white px-3 py-1 rounded text-sm"
+                                                onclick="return confirm('Are you sure you want to reject this request?')"
+                                            >
+                                                Reject
+                                            </button>
+                                        </form>
+
+                                    </div>
+
+                                <% } %>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+            </div>
+        </div>
     </div>
 
     <!-- ===================== -->
     <!-- PENDING MANUAL ORDERS -->
     <!-- ===================== -->
 
-    <h3 class="text-xl font-bold mb-4">Fund Requests</h3>
+    <div class="bg-white rounded-2xl shadow mb-12">
+        <button 
+            onclick="toggleSection('manualSection')" 
+            class="w-full flex justify-between items-center px-4 py-4 sm:p-6 text-left font-bold text-lg"
+        >
+            <span>Pending Manual Orders</span>
+            <span id="manualSectionIcon">▲</span>
+        </button>
 
-    <table class="w-full text-sm border mb-12">
-        <thead class="bg-gray-100">
-            <tr>
-                <th class="p-2 text-left">User</th>
-                <th class="p-2 text-left">Requested</th>
-                <th class="p-2 text-left">Txn ID</th>
-                <th class="p-2 text-left">Status</th>
-                <th class="p-2 text-left">Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            <% (fundRequests || []).forEach(r => { %>
-                <tr class="border-b">
-                    <td class="p-2"><%= r.username %></td>
-                    <td class="p-2">₹<%= r.requested_amount %></td>
-                    <td class="p-2"><%= r.txn_id %></td>
-                    <td class="p-2"><%= r.status %></td>
-                    <td class="p-2">
-                        <% if(r.status === 'pending') { %>
-                            <form method="POST" action="/admin/funds/approve" class="flex gap-2 items-center">
-                                <input type="hidden" name="id" value="<%= r.id %>">
-                                <input 
-                                    type="number"
-                                    name="approved_amount"
-                                    value="<%= r.requested_amount %>"
-                                    min="10"
-                                    required
-                                    class="border px-2 py-1 w-28"
-                                >
-                                <button 
-                                    type="submit"
-                                    class="bg-green-600 text-white px-3 py-1 rounded"
-                                >
-                                    Approve
-                                </button>
-                            </form>
-                            <form method="POST" action="/admin/funds/reject" class="inline">
-                                <input type="hidden" name="id" value="<%= r.id %>">
-                                <button 
-                                    type="submit"
-                                    class="bg-red-600 text-white px-3 py-1 rounded"
-                                    onclick="return confirm('Are you sure you want to reject this request?')"
-                                >
-                                    Reject
-                                </button>
-                            </form>
-                        <% } %>
-                    </td>
-                </tr>
-            <% }) %>
-        </tbody>
-    </table>
+        <div id="manualSection" class="px-6 pb-6">
+            <div class="overflow-x-auto sm:overflow-visible">
+            <table class="w-full text-sm border">
+                <thead class="bg-gray-100">
+                    <tr>
+                        <th class="px-2 py-1 sm:p-2 text-xs sm:text-sm">Order</th>
+                        <th class="px-2 py-1 sm:p-2 text-xs sm:text-sm">User</th>
+                        <th class="px-2 py-1 sm:p-2 text-xs sm:text-sm">Service</th>
+                        <th class="px-2 py-1 sm:p-2 text-xs sm:text-sm">Qty</th>
+                        <th class="px-2 py-1 sm:p-2 text-xs sm:text-sm">Update</th>
+                    </tr>
+                </thead>
 
-    <h3 class="text-xl font-bold mb-4">Pending Manual Orders</h3>
+                <tbody>
+                    <% (orders||[]).forEach(o => { if(((o.status || '').toLowerCase() === 'pending') && o.provider_order_id == null){ %>
+                        <tr class="border-b">
+                            <td class="px-2 py-1 sm:p-2 text-xs sm:text-sm text-gray-400">#<%= o.id %></td>
+                            <td class="px-2 py-1 sm:p-2 text-xs sm:text-sm"><%= o.user_id %></td>
+                            <td class="px-2 py-1 sm:p-2 text-xs sm:text-sm"><%= o.service_name || o.service_id %></td>
+                            <td class="px-2 py-1 sm:p-2 text-xs sm:text-sm"><%= o.quantity %></td>
+                            <td class="px-2 py-1 sm:p-2 text-xs sm:text-sm">
+                                <form method="POST" action="/admin/update-order" class="flex gap-2">
+                                    <input type="hidden" name="order_id" value="<%= o.id %>">
+                                    <input name="provider_order_id" required class="border px-2 py-1">
+                                    <select name="status" class="border px-2 py-1">
+                                        <option value="Processing">Processing</option>
+                                        <option value="Completed">Completed</option>
+                                    </select>
+                                    <button class="bg-blue-600 text-white text-xs sm:text-sm px-2 sm:px-3 py-1 rounded">
+                                        Update
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    <% }}); %>
+                </tbody>
+            </table>
+            </div>
+        </div>
+    </div>
 
-    <table class="w-full text-sm border">
-        <thead class="bg-gray-100">
-            <tr>
-                <th class="p-2">Order</th>
-                <th class="p-2">User</th>
-                <th class="p-2">Service</th>
-                <th class="p-2">Qty</th>
-                <th class="p-2">Update</th>
-            </tr>
-        </thead>
+    <!-- ===================== -->
+    <!-- ALL USERS -->
+    <!-- ===================== -->
 
-        <tbody>
-            <% (orders||[]).forEach(o => { if(o.status==='Pending Manual'){ %>
-                <tr class="border-b">
-                    <td class="p-2 text-gray-400">#<%= o.id %></td>
-                    <td class="p-2"><%= o.user_id %></td>
-                    <td class="p-2"><%= o.service_name || o.service_id %></td>
-                    <td class="p-2"><%= o.quantity %></td>
-                    <td class="p-2">
-                        <form method="POST" action="/admin/update-order" class="flex gap-2">
-                            <input type="hidden" name="order_id" value="<%= o.id %>">
-                            <input name="provider_order_id" required class="border px-2 py-1">
-                            <select name="status" class="border px-2 py-1">
-                                <option value="Processing">Processing</option>
-                                <option value="Completed">Completed</option>
-                            </select>
-                            <button class="bg-blue-600 text-white px-3 py-1 rounded">
-                                Update
-                            </button>
-                        </form>
-                    </td>
-                </tr>
-            <% }}); %>
-        </tbody>
-    </table>
+    <div class="bg-white rounded-2xl shadow mb-12">
+        <button 
+            onclick="toggleSection('allUsersSection')" 
+            class="w-full flex justify-between items-center px-4 py-4 sm:p-6 text-left font-bold text-lg"
+        >
+            <span>All Users</span>
+            <span id="allUsersSectionIcon">▲</span>
+        </button>
+
+        <div id="allUsersSection" class="px-6 pb-6">
+            <div class="max-h-96 overflow-y-auto overflow-x-auto">
+                <table class="w-full text-xs sm:text-sm border">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th class="px-2 py-1 sm:p-2 text-xs sm:text-sm text-left">Username</th>
+                            <th class="px-2 py-1 sm:p-2 text-xs sm:text-sm text-left">Balance</th>
+                            <th class="px-2 py-1 sm:p-2 text-xs sm:text-sm text-left">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% (users || []).forEach(u => { %>
+                            <tr class="border-b">
+                                <td class="px-2 py-1 sm:p-2 text-xs sm:text-sm"><%= u.username %></td>
+                                <td class="px-2 py-1 sm:p-2 text-xs sm:text-sm font-bold">
+                                    &#8377;<%= Number(u.balance || 0).toFixed(2) %>
+                                </td>
+                                <td class="px-2 py-1 sm:p-2 text-xs sm:text-sm">
+                                    <a href="/admin/user/<%= u.id %>" class="text-blue-600 font-semibold text-xs sm:text-sm px-2 sm:px-3 py-1 inline-block">
+                                        View Details
+                                    </a>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== -->
+    <!-- PROVIDERS -->
+    <!-- ===================== -->
+
+    <div class="bg-white rounded-2xl shadow mb-12">
+        <button 
+            onclick="toggleSection('providersSection')" 
+            class="w-full flex justify-between items-center px-4 py-4 sm:p-6 text-left font-bold text-lg"
+        >
+            <span>Providers</span>
+            <span id="providersSectionIcon">▲</span>
+        </button>
+
+        <div id="providersSection" class="px-6 pb-6">
+            <div class="overflow-x-auto">
+            <table class="w-full text-sm border">
+                <thead class="bg-gray-100">
+                    <tr>
+                        <th class="px-4 py-2 text-left">Name</th>
+                        <th class="px-4 py-2 text-left">Balance</th>
+                        <th class="px-4 py-2 text-left">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% (providers||[]).forEach(p => { %>
+                        <tr class="border-b">
+                            <td class="px-4 py-2"><%= p.name %></td>
+                            <td class="px-4 py-2">$<%= p.balance %></td>
+                            <td class="px-4 py-2">
+                                <a href="/admin/sync-services" class="text-blue-600">Sync</a>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+            </div>
+        </div>
+    </div>
 
 </div>
 
@@ -258,6 +394,19 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
+function toggleSection(id) {
+    const el = document.getElementById(id);
+    const icon = document.getElementById(id + "Icon");
+
+    if (el.classList.contains("hidden")) {
+        el.classList.remove("hidden");
+        icon.innerText = "▲";
+    } else {
+        el.classList.add("hidden");
+        icon.innerText = "▼";
+    }
+}
+
 const daily = <%- JSON.stringify(dailyOrders || []) %>;
 const statusRows = <%- JSON.stringify(statusRows || []) %>;
 const serviceRevenue = <%- JSON.stringify(serviceRevenue || []) %>;
@@ -298,3 +447,6 @@ new Chart(document.getElementById('serviceRevenueChart'), {
 // auto refresh
 setInterval(()=>location.reload(),60000);
 </script>
+
+
+

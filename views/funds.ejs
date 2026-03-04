@@ -15,7 +15,7 @@
                     </div>
                     <div class="flex items-baseline gap-2">
                         <span class="text-4xl font-bold">
-                            ₹<%= Number((typeof user !== 'undefined' ? user.balance : 0) || 0).toFixed(2) %>
+                            &#8377;<%= Number((typeof user !== 'undefined' ? user.balance : 0) || 0).toFixed(2) %>
                         </span>
                         <span class="text-blue-300 text-sm">Current Balance</span>
                     </div>
@@ -25,7 +25,7 @@
                     <div class="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl px-4 py-3">
                         <p class="text-[10px] uppercase text-blue-200 mb-1">Lifetime Deposits</p>
                         <p class="font-bold">
-                            ₹<%= Number((typeof totalSpend !== 'undefined' ? totalSpend : 0) || 0).toFixed(2) %>
+                            &#8377;<%= Number((typeof totalSpend !== 'undefined' ? totalSpend : 0) || 0).toFixed(2) %>
                         </p>
                     </div>
                     <div class="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl px-4 py-3">
@@ -68,7 +68,7 @@
                     <label class="block text-sm font-bold text-slate-700 mb-4">1. Enter Deposit Amount</label>
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                            <span class="text-slate-400 font-bold text-xl">₹</span>
+                            <span class="text-slate-400 font-bold text-xl">&#8377;</span>
                         </div>
                         <input type="number" id="amount" name="amount" 
                             class="block w-full pl-12 pr-4 py-5 bg-slate-50 border-2 border-slate-100 rounded-2xl text-2xl font-bold text-slate-900 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all" 
@@ -82,19 +82,19 @@
 
                 <div class="flex flex-wrap gap-3 mb-8">
                     <button type="button" data-amount="500" class="amount-btn px-5 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:border-blue-500 hover:text-blue-600 hover:bg-blue-50 transition-all">
-                        ₹500
+                        &#8377;500
                     </button>
                     <button type="button" data-amount="1000" class="amount-btn px-5 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:border-blue-500 hover:text-blue-600 hover:bg-blue-50 transition-all">
-                        ₹1,000
+                        &#8377;1,000
                     </button>
                     <button type="button" data-amount="2000" class="amount-btn px-5 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:border-blue-500 hover:text-blue-600 hover:bg-blue-50 transition-all">
-                        ₹2,000
+                        &#8377;2,000
                     </button>
                     <button type="button" data-amount="5000" class="amount-btn px-5 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:border-blue-500 hover:text-blue-600 hover:bg-blue-50 transition-all">
-                        ₹5,000
+                        &#8377;5,000
                     </button>
                     <button type="button" data-amount="10000" class="amount-btn px-5 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:border-blue-500 hover:text-blue-600 hover:bg-blue-50 transition-all">
-                        ₹10,000
+                        &#8377;10,000
                     </button>
                 </div>
 
@@ -139,16 +139,16 @@
                 <div class="space-y-4">
                     <div class="flex justify-between text-sm">
                         <span class="text-slate-500">Amount</span>
-                        <span id="summaryAmount" class="font-bold text-slate-800">₹0.00</span>
+                        <span id="summaryAmount" class="font-bold text-slate-800">&#8377;0.00</span>
                     </div>
                     <div class="flex justify-between text-sm">
                         <span class="text-slate-500">Gateway Fees</span>
-                        <span class="text-green-600 font-bold">₹0.00 (Free)</span>
+                        <span class="text-green-600 font-bold">&#8377;0.00 (Free)</span>
                     </div>
                     <hr class="border-slate-100">
                     <div class="flex justify-between items-center">
                         <span class="text-sm font-bold text-slate-800">Total Credit</span>
-                        <span id="summaryTotal" class="text-xl font-black text-blue-600">₹0.00</span>
+                        <span id="summaryTotal" class="text-xl font-black text-blue-600">&#8377;0.00</span>
                     </div>
                 </div>
             </div>
@@ -174,22 +174,86 @@
     </div>
 </div>
 
+<% if (fundHistory && fundHistory.length > 0) { %>
+<div class="mb-4 px-3">
+  <p class="text-sm text-slate-600 leading-relaxed">
+    <i class="fa-solid fa-circle-info text-blue-500 mr-1"></i>
+    Funds are usually verified within 
+    <span class="font-semibold text-slate-800">5 to 15 minutes</span> 
+    during working hours.
+  </p>
+</div>
+<div class="glass-panel rounded-2xl overflow-hidden mt-10">
+  <div class="p-6 border-b bg-white">
+    <h3 class="font-bold text-slate-800 text-lg">Fund Approval History</h3>
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="w-full mobile-card-table">
+      <thead class="bg-slate-50 text-xs uppercase">
+        <tr>
+          <th class="p-4">ID</th>
+          <th class="p-4">Amount</th>
+          <th class="p-4">Method</th>
+          <th class="p-4">Txn</th>
+          <th class="p-4">Status</th>
+          <th class="p-4">Date</th>
+        </tr>
+      </thead>
+
+      <tbody class="divide-y bg-white">
+        <% fundHistory.forEach(fund => { %>
+        <tr>
+          <td class="p-4 text-xs text-slate-500">#<%= fund.id %></td>
+
+          <td class="p-4 font-bold text-green-600">
+            &#8377;<%= Number(fund.amount || 0).toFixed(2) %>
+          </td>
+
+          <td class="p-4"><%= fund.payment_method || 'UPI' %></td>
+
+          <td class="p-4 text-xs"><%= fund.txn_id || '-' %></td>
+
+          <td class="p-4">
+            <% 
+              let badge = 'badge-pending';
+              if((fund.status || '').toLowerCase() === 'approved') badge = 'badge-completed';
+              if((fund.status || '').toLowerCase() === 'rejected') badge = 'badge-canceled';
+            %>
+            <span class="badge <%= badge %>"><%= fund.status %></span>
+          </td>
+
+          <td class="p-4 text-xs text-slate-500">
+            <%= fund.created_at ? new Date(fund.created_at).toLocaleDateString() : '-' %>
+          </td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
+<% } %>
+
 <div id="paymentModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 min-h-screen p-4">
-    <div class="bg-white rounded-2xl p-6 max-w-sm w-full text-center shadow-xl animate-fade-in">
-        <div class="mb-4">
-            <i class="fa-solid fa-circle-check text-green-500 text-4xl"></i>
-        </div>
-        <h3 class="text-lg font-bold text-slate-800 mb-2">
-            Payment Received
-        </h3>
-        <p class="text-sm text-slate-600 mb-6">
-            Your funds will be added after verification. Please wait.
-        </p>
-        <button id="closeModal"
-            class="px-6 py-2 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition">
-            OK
-        </button>
+  <div class="bg-white rounded-2xl p-6 max-w-sm w-full text-center shadow-xl animate-fade-in">
+    
+    <div class="mb-4">
+      <i id="modalIcon" class="fa-solid fa-circle-check text-green-500 text-4xl"></i>
     </div>
+
+    <h3 id="modalTitle" class="text-lg font-bold text-slate-800 mb-2">
+      Payment Received
+    </h3>
+
+    <p id="modalMessage" class="text-sm text-slate-600 mb-6">
+      Your funds will be added after verification.
+    </p>
+
+    <button id="closeModal"
+      class="px-6 py-2 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition">
+      OK
+    </button>
+  </div>
 </div>
 
 
@@ -209,8 +273,8 @@ document.addEventListener("DOMContentLoaded", function () {
         const val = parseFloat(amountInput.value) || 0;
         const txnId = txnIdInput.value.trim();
 
-        summaryAmount.innerText = `₹${val.toFixed(2)}`;
-        summaryTotal.innerText = `₹${val.toFixed(2)}`;
+        summaryAmount.innerText = `\u20B9${val.toFixed(2)}`;
+        summaryTotal.innerText = `\u20B9${val.toFixed(2)}`;
 
         if (val >= 10 && txnId !== "") {
             payBtn.disabled = false;
@@ -269,12 +333,22 @@ document.addEventListener("DOMContentLoaded", function () {
         })
         .then(res => res.json())
         .then(data => {
+            const modal = document.getElementById("paymentModal");
+            const icon = document.getElementById("modalIcon");
+            const title = document.getElementById("modalTitle");
+            const message = document.getElementById("modalMessage");
+
             if (data.success) {
-                document.getElementById("paymentModal").classList.remove("hidden");
+                icon.className = "fa-solid fa-circle-check text-green-500 text-4xl";
+                title.innerText = "Payment Submitted";
+                message.innerText = "Your funds will be added after admin verification.";
             } else {
-                validationMsg.innerText = data.error || "Request failed";
-                validationMsg.className = "text-xs font-medium text-red-500";
+                icon.className = "fa-solid fa-circle-xmark text-red-500 text-4xl";
+                title.innerText = "Payment Failed";
+                message.innerText = data.error || "Something went wrong";
             }
+
+            modal.classList.remove("hidden");
         })
     .catch(() => {
         validationMsg.innerText = "Server error. Try again.";
@@ -289,4 +363,5 @@ document.getElementById("closeModal").addEventListener("click", () => {
 
 });
 </script>
+
 

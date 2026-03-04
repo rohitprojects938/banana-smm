@@ -173,3 +173,11 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
+
+window.addEventListener("load", () => {
+  const landingLoader = document.getElementById("landing-loader");
+  if (landingLoader) {
+    landingLoader.style.opacity = "0";
+    setTimeout(() => landingLoader.remove(), 300);
+  }
+});

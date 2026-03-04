@@ -1,5 +1,79 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
+#header-loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  background: #ffffff;
+  border-bottom: 1px solid #eef0f2;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  z-index: 10000;
+}
+
+body.loading nav {
+  visibility: hidden;
+}
+
+@media (min-width: 640px) {
+  #header-loader {
+    padding: 0 24px;
+  }
+}
+
+@media (min-width: 1024px) {
+  #header-loader {
+    height: 80px;
+    padding: 0 32px;
+  }
+}
+
+.header-loader-inner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header-loader-logo {
+  width: 40px;
+  height: 40px;
+}
+
+@media (min-width: 1024px) {
+  .header-loader-logo {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+.header-loader-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.header-loader-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+@media (min-width: 1024px) {
+  .header-loader-title {
+    font-size: 24px;
+  }
+}
+
+.header-loader-sub {
+  font-size: 10px;
+  font-weight: 700;
+  color: #64748b;
+  letter-spacing: 0.1em;
+}
+
 /* --- Root Variables & Theme --- */
 :root {
   --primary: #2563eb;
@@ -809,5 +883,61 @@ details p {
 @media (max-width: 640px) {
   body {
     overscroll-behavior-y: contain;
+  }
+}
+
+/* ------------------------------
+   MOBILE ONLY FIXES (<= 640px)
+   Desktop untouched
+-------------------------------- */
+@media (max-width: 640px) {
+
+  /* Affiliate Program card spacing */
+  .affiliate-card,
+  .affiliate-section,
+  .affiliate-box {
+    padding: 16px !important;
+  }
+
+  /* Affiliate Program header layout */
+  .affiliate-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+  }
+
+  /* Open Affiliate Dashboard button */
+  .affiliate-header a,
+  .affiliate-header button {
+    width: 100% !important;
+    text-align: center !important;
+    margin-top: 8px;
+  }
+
+  /* Dashboard top action buttons */
+  .dashboard-actions {
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+
+  .dashboard-actions a {
+    width: 100%;
+  }
+
+  /* Reduce grid heaviness on mobile */
+  .grid-cols-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  /* Reduce card padding on mobile */
+  .glass-panel {
+    padding: 16px !important;
+  }
+
+  /* Prevent buttons touching screen edge */
+  .container,
+  .page-container {
+    padding-left: 14px;
+    padding-right: 14px;
   }
 }

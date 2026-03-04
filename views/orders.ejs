@@ -16,10 +16,10 @@
                 </div>
                 <select id="statusFilter" class="bg-white border border-slate-200 px-4 py-2 rounded-xl text-sm text-slate-600 focus:ring-2 focus:ring-indigo-500 outline-none shadow-sm cursor-pointer">
                     <option value="all">All Status</option>
-                    <option value="Completed">Completed</option>
-                    <option value="Processing">Processing</option>
-                    <option value="Pending">Pending</option>
-                    <option value="Canceled">Canceled</option>
+                    <option value="completed">Completed</option>
+                    <option value="processing">Processing</option>
+                    <option value="pending">Pending</option>
+                    <option value="canceled">Canceled</option>
                 </select>
             </div>
         </div>
@@ -57,23 +57,26 @@
                                     }
 
                                     // Refill Logic
-                                    const canRefill = order.status === 'Completed' && Number(order.refill_days || 0) > 0 && Number(order.refill_requested || 0) === 0;
+                                    const normalizedStatus = (order.status || '').toLowerCase();
+                                    const canRefill = normalizedStatus === 'completed' && Number(order.refill_days || 0) > 0 && Number(order.refill_requested || 0) === 0;
 
                                     // Status Badge Config
                                     const statusMap = {
-                                        'Completed': { class: 'bg-emerald-50 text-emerald-700 border-emerald-100', icon: 'check-circle' },
-                                        'Processing': { class: 'bg-blue-50 text-blue-700 border-blue-100', icon: 'sync fa-spin' },
-                                        'Pending': { class: 'bg-amber-50 text-amber-700 border-amber-100', icon: 'clock' },
-                                        'Pending Manual': { class: 'bg-amber-50 text-amber-700 border-amber-100', icon: 'hand-paper' },
-                                        'Canceled': { class: 'bg-rose-50 text-rose-700 border-rose-100', icon: 'times-circle' }
+                                        'completed': { class: 'bg-emerald-50 text-emerald-700 border-emerald-100', icon: 'check-circle' },
+                                        'processing': { class: 'bg-blue-50 text-blue-700 border-blue-100', icon: 'sync fa-spin' },
+                                        'pending': { class: 'bg-amber-50 text-amber-700 border-amber-100', icon: 'clock' },
+                                        'pending manual': { class: 'bg-amber-50 text-amber-700 border-amber-100', icon: 'hand-paper' },
+                                        'partial': { class: 'bg-violet-50 text-violet-700 border-violet-100', icon: 'circle-half-stroke' },
+                                        'canceled': { class: 'bg-rose-50 text-rose-700 border-rose-100', icon: 'times-circle' },
+                                        'cancelled': { class: 'bg-rose-50 text-rose-700 border-rose-100', icon: 'times-circle' }
                                     };
-                                    const currentStatus = statusMap[order.status] || { class: 'bg-slate-50 text-slate-600 border-slate-100', icon: 'circle' };
+                                    const currentStatus = statusMap[normalizedStatus] || { class: 'bg-slate-50 text-slate-600 border-slate-100', icon: 'circle' };
                                 %>
                                 <tr class="order-row group hover:bg-slate-50/80 transition-all duration-200 animate-fadeIn" 
                                     data-order-id="<%= order.id %>" 
                                     data-service="<%= displayServiceName %>" 
                                     data-link="<%= order.link %>" 
-                                    data-status="<%= order.status %>">
+                                    data-status="<%= (order.status || '').toLowerCase() %>">
                                <td class="p-4 font-mono text-xs text-slate-400">
                                         <div class="flex flex-col">
                                             <span class="text-sm text-slate-900">#<%= order.id %></span>
@@ -101,7 +104,7 @@
                                     </td>
 
                                     <td class="p-4">
-                                        <span class="text-sm font-semibold text-slate-900">₹<%= Number(order.charge || 0).toFixed(2) %></span>
+                                        <span class="text-sm font-semibold text-slate-900">&#8377;<%= Number(order.charge || 0).toFixed(2) %></span>
                                     </td>
 
                                     <td class="p-4">
@@ -118,7 +121,7 @@
                                                 Request Refill
                                             </button>
                                         <% } else { %>
-                                            <span class="text-slate-300 font-medium">—</span>
+                                            <span class="text-slate-300 font-medium">â€”</span>
                                         <% } %>
                                     </td>
                                 </tr>
@@ -168,7 +171,7 @@
                 const orderId = row.getAttribute('data-order-id') || '';
                 const service = row.getAttribute('data-service').toLowerCase() || '';
                 const link = row.getAttribute('data-link').toLowerCase() || '';
-                const status = row.getAttribute('data-status') || '';
+                const status = (row.getAttribute('data-status') || '').toLowerCase();
 
                 const matchesSearch = orderId.includes(searchTerm) || 
                                     service.includes(searchTerm) || 
@@ -202,3 +205,4 @@
         statusFilter.addEventListener('change', performFilter);
     });
 </script>
+

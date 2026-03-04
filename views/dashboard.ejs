@@ -20,7 +20,7 @@
         <a href="/funds" class="md:hidden flex-1 min-w-[170px] bg-white border border-slate-200 px-4 py-2.5 rounded-xl flex items-center justify-between shadow-sm">
             <span class="text-xs text-slate-500 font-medium">Balance</span>
             <span class="font-bold text-slate-800">
-                ₹<%= Number(user.balance || 0).toFixed(2) %>
+                &#8377;<%= Number(user.balance || 0).toFixed(2) %>
             </span>
         </a>
         
@@ -105,7 +105,7 @@
             </p>
             <p class="text-slate-800 text-sm font-medium">
                 <span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded text-[10px] font-bold mr-1 align-middle">HI</span>
-                Instagram Followers order karne se pehle <span class="font-bold text-red-600">“Flag for review”</span> option OFF karna zaroori hai.
+                Instagram Followers order karne se pehle <span class="font-bold text-red-600">"Flag for review"</span> option OFF karna zaroori hai.
             </p>
         </div>
 
@@ -199,7 +199,7 @@
         <div>
             <p class="text-xs font-semibold uppercase tracking-wider text-blue-600/80 mb-1">Total Spent</p>
             <h3 class="text-3xl font-bold text-primary">
-               ₹<%= Number(totalSpend || 0).toFixed(2) %>+
+               &#8377;<%= Number(totalSpend || 0).toFixed(2) %>+
             </h3>
         </div>
         <div class="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center">
@@ -247,6 +247,20 @@
     </div>
 </div>
 <% } %>
+
+<div class="bg-white rounded-2xl p-6 mb-8 flex items-center justify-between affiliate-section affiliate-header">
+  <div>
+    <h3 class="text-lg font-bold text-slate-800">Affiliate Program</h3>
+    <p class="text-sm text-slate-500">
+      Earn 10% commission from your referrals
+    </p>
+  </div>
+
+  <a href="/affiliate"
+     class="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-xl text-sm font-medium transition">
+    Open Affiliate Dashboard →
+  </a>
+</div>
 
 <div class="glass-panel rounded-2xl overflow-hidden delay-300 animate-fade-in-up">
     <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-white">
@@ -299,17 +313,17 @@
                     </td>
 
                     <td class="p-4 font-bold text-slate-700" data-label="Charge">
-                        <%= user.currency === 'INR' ? '₹' : '$' %><%= Number(order.charge || 0).toFixed(3) %>
+                        <%- user.currency === 'INR' ? '&#8377;' : '$' %><%= Number(order.charge || 0).toFixed(3) %>
                     </td>
 
                     <td class="p-4" data-label="Status">
                         <% 
-                            let badgeClass = 'bg-slate-100 text-slate-600';
-                            if(order.status === 'Completed') badgeClass = 'badge-completed';
-                            if(order.status === 'Processing' || order.status === 'In Progress') badgeClass = 'badge-processing';
-                            if(order.status === 'Canceled') badgeClass = 'badge-canceled';
-                            if(order.status === 'Pending') badgeClass = 'badge-pending';
-                            if(order.status === 'Partial') badgeClass = 'badge-partial';
+                            const status = (order.status || '').toLowerCase();
+                            let badgeClass = 'badge-processing';
+                            if(status === 'completed') badgeClass = 'badge-completed';
+                            if(status === 'pending') badgeClass = 'badge-pending';
+                            if(status === 'partial') badgeClass = 'badge-partial';
+                            if(status === 'canceled' || status === 'cancelled') badgeClass = 'badge-canceled';
                         %>
                         <span class="badge <%= badgeClass %>">
                             <%= order.status %>
@@ -330,3 +344,4 @@
 </div>
 
 </div>
+
