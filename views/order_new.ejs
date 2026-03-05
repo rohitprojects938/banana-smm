@@ -1,4 +1,4 @@
-﻿<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-0 pb-12">
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-0 pb-12">
   
   <div class="mb-8">
     <h1 class="text-3xl font-extrabold text-slate-900">New Order</h1>
@@ -158,7 +158,7 @@
 <div id="orderSuccessModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50">
   <div class="bg-white rounded-2xl shadow-xl w-[90%] max-w-md p-6 text-center animate-scale-in">
     <div class="text-green-600 text-4xl mb-3">
-      Ã¢Å“â€
+      ✅
     </div>
     <h2 class="text-lg font-bold text-slate-800 mb-2">
       Order Placed Successfully
@@ -213,7 +213,7 @@
     return isHiddenLabel(service?.name) || isHiddenLabel(service?.category);
   }
 
-  // Ã¢Å“â€¦ DEFAULT SERVICES (Exact SafeSMM-like)
+  // ✅ DEFAULT SERVICES (Exact SafeSMM-like)
 const DEFAULT_SERVICE_IDS = [
   3533, // Instagram Reels Views
   4017, // Instagram Likes
@@ -303,10 +303,10 @@ function populateServices(category = "") {
   let filtered = [];
 
   if (category) {
-    // Category selected Ã¢â€ â€™ only that category services
+    // Category selected → only that category services
     filtered = DB_SERVICES.filter(s => s.category === category);
   } else {
-    // Ã¢Ââ€” NO CATEGORY Ã¢â€ â€™ show default services
+    // — NO CATEGORY → show default services
   filtered = DB_SERVICES.filter(s =>
   DEFAULT_SERVICE_IDS.includes(Number(s.provider_service_id))
     );
@@ -336,7 +336,7 @@ function populateServices(category = "") {
 function selectService(service) {
   currentSelectedService = service;
 
-  // Ã¢Å“â€¦ AUTO CATEGORY SET (IMPORTANT FIX)
+  // ✅ AUTO CATEGORY SET (IMPORTANT FIX)
   if (!currentSelectedCategory && service.category) {
     currentSelectedCategory = service.category;
     selectedCategoryLabel.innerText = service.category;
@@ -350,7 +350,7 @@ function selectService(service) {
   summaryRate.innerText = `\u20B9${service.selling_rate} / 1000`;
 
 
-  // Ã¢Å“â€¦ MIN MAX SHOW
+  // ✅ MIN MAX SHOW
   if (service.min && service.max) {
     minMaxText.innerText = "Minimum: " + service.min + " | Maximum: " + service.max;
     minMaxText.className = "text-xs text-gray-400 mt-2";
@@ -358,7 +358,7 @@ function selectService(service) {
     orderQty.min = service.min;
     orderQty.max = service.max;
     
-    // Ã¢Å“â€¦ Default quantity = 1000 (or service.min if min > 1000)
+    // ✅ Default quantity = 1000 (or service.min if min > 1000)
 const defaultQty = 1000;
 
 if (service.min && service.min > defaultQty) {
@@ -435,7 +435,7 @@ document.getElementById("resetBtn").addEventListener("click", () => {
     const link = document.getElementById("orderLink").value.trim();
     const qty = Number(orderQty.value || 0);
 
-        // Ã¢Ââ€” Category only required if service NOT selected
+        // — Category only required if service NOT selected
     if (!serviceId && !category) {
       err.innerText = "Please select a category.";
       err.classList.remove("hidden");
@@ -507,7 +507,7 @@ document.getElementById("resetBtn").addEventListener("click", () => {
 
   // Initialize
   initCategories();
-  populateServices(); // Ã°Å¸â€˜Ë† DEFAULT SERVICES LOAD
+  populateServices(); // 📌 DEFAULT SERVICES LOAD
 </script>
 
 

@@ -445,16 +445,11 @@ app.use((req, res, next) => {
 
 app.set('view engine', 'ejs');
 
-// Force UTF-8 for all server-rendered HTML responses.
+// Force UTF-8 responses.
 app.use((req, res, next) => {
-  const render = res.render.bind(res);
-  res.render = (view, options, callback) => {
-    res.setHeader("Content-Type", "text/html; charset=UTF-8");
-    return render(view, options, callback);
-  };
+  res.setHeader("Content-Type", "text/html; charset=UTF-8");
   next();
 });
-
 // --- Global View Variables ---
 app.use((req, res, next) => {
   res.locals.user = req.session.user || null;
