@@ -1,4 +1,4 @@
-const path = require("path");
+﻿const path = require("path");
 require("dotenv").config({ path: path.join(__dirname, ".env") });
 
 console.log("ENV CHECK:", process.env.GOOGLE_CLIENT_ID);
@@ -16,6 +16,7 @@ const fs = require("fs");
 const crypto = require("crypto");
 
 let APP_READY = false;
+let dbKeepAliveInterval = null;
 
 const app = express();
 
@@ -79,6 +80,17 @@ const pool = mysql.createPool({
       await initDB();
       APP_READY = true;
       console.log("APP READY = true");
+
+      if (!dbKeepAliveInterval) {
+        dbKeepAliveInterval = setInterval(async () => {
+          try {
+            await pool.query("SELECT 1");
+            console.log("DB keep-alive ping");
+          } catch (err) {
+            console.error("Keep-alive error:", err.message);
+          }
+        }, 300000);
+      }
     }, 5000);
   } catch (error) {
     console.error("MySQL connection error:", error.message);
@@ -1642,6 +1654,15 @@ app.get("/test-db", requireAdmin, async (req, res) => {
     res.status(500).send("DB error");
   }
 });
+
+app.get("/keep-db-alive", async (req, res) => {
+  try {
+    await pool.query("SELECT 1");
+    res.send("DB alive");
+  } catch (err) {
+    res.status(500).send("DB error");
+  }
+});
 // Sync services from provider to local DB
 app.get("/admin/sync-services", requireAdmin, async (req, res) => {
   try {
@@ -1861,7 +1882,6 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, "0.0.0.0", () => {
   console.log("Server running on port " + PORT);
 });
-
 
 
 
